@@ -17,6 +17,14 @@
     <string name="ipInvalid" tools:ignore="UnusedResources">Invalid IP Address</string>
     <string name="clear" tools:ignore="UnusedResources">Clear</string>
 
+    <string name="speed">Speed</string>
+    <string name="pause">Pause</string>
+    <string name="present">Present</string>
+    <string name="backwardForward">Backward/Forward</string>
+    <string name="backward">Backward</string>
+    <string name="forward">Forward</string>
+    <string name="loopType">Loop Type</string>
+
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment" tools:ignore="UnusedResources">Hello blank fragment</string>
     <string name="title_activity_draw2">DrawActivity2</string>
