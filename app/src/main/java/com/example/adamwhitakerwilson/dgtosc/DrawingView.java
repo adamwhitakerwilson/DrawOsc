@@ -7,10 +7,14 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Point;
+import android.provider.MediaStore;
+import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.view.Display;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.Toast;
 
 import com.illposed.osc.OSCMessage;
@@ -26,11 +30,11 @@ import java.util.List;
  * Created by adamwhitakerwilson on 2017-04-04.
  */
 
-
-
 //Custom View
 
 public class DrawingView extends View {
+
+    //network variables
     private OSCPortOut sender1 = null;
     private OSCPortOut sender2 = null;
     private OSCPortOut sender3 = null;
@@ -44,6 +48,7 @@ public class DrawingView extends View {
     private String targetIPStr;
     private int portNumber;
 
+    //points
     private float x1;
     private float y1;
     private float x2;
@@ -61,6 +66,14 @@ public class DrawingView extends View {
     private float x8;
     private float y8;
 
+    private final List<Float> xHold = new ArrayList<>();
+    private final List<Float> yHold = new ArrayList<>();
+
+    //time
+    private final List<Long> timeHold = new ArrayList<>();
+    private long timeStampStart;
+
+    //maths
     float CNeg315 = (float) Math.cos(-315);
     float SNeg315 = (float) Math.sin(-315);
     float C180 = (float) Math.cos(180);
@@ -70,19 +83,12 @@ public class DrawingView extends View {
     float C315 = (float) Math.cos(315);
     float S315 = (float) Math.sin(315);
 
+    //triggers
     private boolean to = false;
-
-    private final List<Float> xHold = new ArrayList<>();
-    private final List<Float> yHold = new ArrayList<>();
-    private final List<Long> timeHold = new ArrayList<>();
-
-    private long timeStampStart;
-
-    private Paint mPaint;
     private boolean clearOn = false;
 
-    public int width;
-    public int height;
+    //paints
+    private Paint mPaint;
     private Bitmap mBitmap;
     private Canvas mCanvas;
     private final Path mPath;
@@ -90,12 +96,26 @@ public class DrawingView extends View {
     private final Paint circlePaint;
     private final Path circlePath;
 
+    //measurements
+    public int width;
+    public int height;
+
     int maxX = 500;
     int maxY = 250;
+
+    //GUIs
+    RadioButton forward;
+    RadioButton backward;
+    RadioButton backwardForward;
 
 
     public DrawingView(Context context, AttributeSet attrs) {
         super(context, attrs);
+
+        forward = (RadioButton) findViewById(R.id.forward);
+        backward = (RadioButton) findViewById(R.id.backward);
+        backwardForward = (RadioButton) findViewById(R.id.backwardForward);
+
         mPath = new Path();
         mBitmapPaint = new Paint(Paint.DITHER_FLAG);
         circlePaint = new Paint();
@@ -125,13 +145,14 @@ public class DrawingView extends View {
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
 
-        maxY = MeasureSpec.getSize(heightMeasureSpec);
         maxX = MeasureSpec.getSize(widthMeasureSpec);
+        maxY = MeasureSpec.getSize(heightMeasureSpec);
 
     }
 
     @Override
     public boolean isInEditMode() {
+
         return true;
     }
 
@@ -146,6 +167,12 @@ public class DrawingView extends View {
         width = w;      // don't forget these
         height = h;
 
+        final float a, b, c, d;
+
+        a = maxX/2;
+
+        b = maxY/2;
+
         mBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
 
         mBitmap.eraseColor(Color.BLACK);
@@ -157,10 +184,10 @@ public class DrawingView extends View {
         paint.setColor(Color.GRAY);
         paint.setStyle(Paint.Style.STROKE);
 
-        mCanvas.drawLine(250F, 0F, 250F, 500F, paint);
-        mCanvas.drawLine(0F, 250F, 500F, 250F, paint);
-        mCanvas.drawCircle(250F, 250F, 200F, paint);
-        // mCanvas.drawRect(150F, 150F, 250F, 500F, paint);
+        mCanvas.drawLine(a, b-(b/2), a, b+(b/2), paint);
+        mCanvas.drawLine((a/2)+(a/4), b,(maxX*0.75f)-(a/4), b, paint);
+        mCanvas.drawCircle(a, b, 200F, paint);
+        mCanvas.drawRect(maxX/6, maxY/6, maxX-(maxX/6), maxY-(maxY/6), paint);
     }
 
     @Override
@@ -251,7 +278,6 @@ public class DrawingView extends View {
                 break;
             case MotionEvent.ACTION_UP:
 
-
                 long timeStampEnd = System.nanoTime() / 1000000;
                 @SuppressWarnings("UnusedAssignment") long timeDifferenceTotal = timeStampEnd - timeStampStart;
                 to = false;
@@ -279,10 +305,10 @@ public class DrawingView extends View {
 
                 adamsMath();
                 sendMyOscMessage();
+
             }
 
         }).start();
-
 
         return true;
     }
@@ -290,11 +316,8 @@ public class DrawingView extends View {
     public void clearDrawing() {
         //clear canvas
         setDrawingCacheEnabled(false);
-        // don't forget that one and the match below,
-        // or you just keep getting a duplicate when you save.
 
         onSizeChanged(width, height, width, height);
-
         setDrawingCacheEnabled(true);
     }
 
@@ -314,51 +337,54 @@ public class DrawingView extends View {
             public void run() {
                 int pathSize = xHold.size();
 
-                while (i < pathSize) {
+                if (1==1) {          //DO THIS!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                    while (i < pathSize) {
 
-                    //                       touch_start(xHold.get(i), yHold.get(i));
-//                        invalidate();
+                            //touch_start(xHold.get(i), yHold.get(i));
+                            //invalidate();
 
-                    //  while(i >= 0){
-                    now2 = System.nanoTime() / 1000000;
+                            //  while(i >= 0){
+                        now2 = System.nanoTime() / 1000000;
 
-                    if (pathSize == 0) {
-                        // to = true;
-                        //break;
-                    } else if (now2 - now1 == timeHold.get(i)) {
-                        x1 = xHold.get(i);
-                        y1 = yHold.get(i);
-//                            touch_move(xHold.get(i), yHold.get(i));
-//                            invalidate();
+                        if (pathSize == 0) {
+                            // to = true;
+                            //break;
+                        } else if (now2 - now1 == timeHold.get(i)) {
+                            x1 = xHold.get(i);
+                            y1 = yHold.get(i);
+                            //touch_move(xHold.get(i), yHold.get(i));
+                            //invalidate();
 
-                        x1 = normalizeX(x1);
-                        y1 = normalizeY(y1);
+                            x1 = normalizeX(x1);
+                            y1 = normalizeY(y1);
 
-                        adamsMath();
-                        sendMyOscMessage();
+                            adamsMath();
+                            sendMyOscMessage();
 
-                        //   Log.d("size: ", Integer.toString(xHold.size()));
-                        //   Log.d("xHold: ", Float.toString(xHold.get(i)));
-                        //   Log.d("TimeHold: ", Float.toString(timeHold.get(i)));
-                        //   Log.d("now: ", Long.toString(now2-now1));
-                        i++;
+                            //   Log.d("size: ", Integer.toString(xHold.size()));
+                            //   Log.d("xHold: ", Float.toString(xHold.get(i)));
+                            //   Log.d("TimeHold: ", Float.toString(timeHold.get(i)));
+                            //   Log.d("now: ", Long.toString(now2-now1));
+                            i++;
 
-                        // i--;
-                        // float sum = getDistance(xRaw, yRaw, ev);
-                        //  Log.d("distance", Float.toString(sum));
+                            // i--;
+                            // float sum = getDistance(xRaw, yRaw, ev);
+                            //  Log.d("distance", Float.toString(sum));
+
+                        }
 
                     }
-
-                }
-                if (!to) {
-                    try {
-                        printDataFile();
-                    } catch (Exception e) {
-                        e.printStackTrace();
+                    if (!to) {
+                        try {
+                            printDataFile();
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
                     }
                 }
             }
         }).start();
+
     }
 
     //set OSC UDP Port Connection
