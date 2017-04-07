@@ -555,14 +555,4 @@ public class DrawingView extends View {
     }
 
 
-    //displays a toast message
-    public void toast(String msg){
-      //  Context context = getApplicationContext();
-        int duration = Toast.LENGTH_SHORT;
-
-     //   Toast toast = Toast.makeText(context, msg, duration);
-      //  toast.show();
-    }
-
-
 }
