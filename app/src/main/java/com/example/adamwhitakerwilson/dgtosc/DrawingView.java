@@ -7,10 +7,14 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Point;
+import android.provider.MediaStore;
+import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.view.Display;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.Toast;
 
 import com.illposed.osc.OSCMessage;
@@ -26,11 +30,11 @@ import java.util.List;
  * Created by adamwhitakerwilson on 2017-04-04.
  */
 
-
-
 //Custom View
 
 public class DrawingView extends View {
+
+    //network variables
     private OSCPortOut sender1 = null;
     private OSCPortOut sender2 = null;
     private OSCPortOut sender3 = null;
@@ -44,6 +48,7 @@ public class DrawingView extends View {
     private String targetIPStr;
     private int portNumber;
 
+    //points
     private float x1;
     private float y1;
     private float x2;
@@ -61,28 +66,29 @@ public class DrawingView extends View {
     private float x8;
     private float y8;
 
-    float CNeg315 = (float)Math.cos(-315);
-    float SNeg315 = (float)Math.sin(-315);
-    float C180 = (float)Math.cos(180);
-    float S180 = (float)Math.sin(180);
-    float CNeg135 = (float)Math.cos(-135);
-    float SNeg135 = (float)Math.sin(-135);
-    float C315 = (float)Math.cos(315);
-    float S315 = (float)Math.sin(315);
-
-    private boolean to = false;
-
     private final List<Float> xHold = new ArrayList<>();
     private final List<Float> yHold = new ArrayList<>();
-    private final List<Long> timeHold = new ArrayList<>();
 
+    //time
+    private final List<Long> timeHold = new ArrayList<>();
     private long timeStampStart;
 
-    private Paint mPaint;
+    //maths
+    float CNeg315 = (float) Math.cos(-315);
+    float SNeg315 = (float) Math.sin(-315);
+    float C180 = (float) Math.cos(180);
+    float S180 = (float) Math.sin(180);
+    float CNeg135 = (float) Math.cos(-135);
+    float SNeg135 = (float) Math.sin(-135);
+    float C315 = (float) Math.cos(315);
+    float S315 = (float) Math.sin(315);
+
+    //triggers
+    private boolean to = false;
     private boolean clearOn = false;
 
-    public int width;
-    public  int height;
+    //paints
+    private Paint mPaint;
     private Bitmap mBitmap;
     private Canvas mCanvas;
     private final Path mPath;
@@ -90,12 +96,26 @@ public class DrawingView extends View {
     private final Paint circlePaint;
     private final Path circlePath;
 
+    //measurements
+    public int width;
+    public int height;
+
     int maxX = 500;
     int maxY = 250;
+
+    //GUIs
+    RadioButton forward;
+    RadioButton backward;
+    RadioButton backwardForward;
 
 
     public DrawingView(Context context, AttributeSet attrs) {
         super(context, attrs);
+
+        forward = (RadioButton) findViewById(R.id.forward);
+        backward = (RadioButton) findViewById(R.id.backward);
+        backwardForward = (RadioButton) findViewById(R.id.backwardForward);
+
         mPath = new Path();
         mBitmapPaint = new Paint(Paint.DITHER_FLAG);
         circlePaint = new Paint();
@@ -125,13 +145,14 @@ public class DrawingView extends View {
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
 
-        maxY= MeasureSpec.getSize(heightMeasureSpec);
-        maxX= MeasureSpec.getSize(widthMeasureSpec);
+        maxX = MeasureSpec.getSize(widthMeasureSpec);
+        maxY = MeasureSpec.getSize(heightMeasureSpec);
 
     }
 
     @Override
     public boolean isInEditMode() {
+
         return true;
     }
 
@@ -146,6 +167,12 @@ public class DrawingView extends View {
         width = w;      // don't forget these
         height = h;
 
+        final float a, b, c, d;
+
+        a = maxX/2;
+
+        b = maxY/2;
+
         mBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
 
         mBitmap.eraseColor(Color.BLACK);
@@ -157,26 +184,27 @@ public class DrawingView extends View {
         paint.setColor(Color.GRAY);
         paint.setStyle(Paint.Style.STROKE);
 
-        mCanvas.drawLine(250F, 0F, 250F, 500F, paint);
-        mCanvas.drawLine(0F, 250F, 500F, 250F, paint);
-        mCanvas.drawCircle(250F, 250F, 200F, paint);
-        // mCanvas.drawRect(150F, 150F, 250F, 500F, paint);
+        mCanvas.drawLine(a, b-(b/2), a, b+(b/2), paint);
+        mCanvas.drawLine((a/2)+(a/4), b,(maxX*0.75f)-(a/4), b, paint);
+        mCanvas.drawCircle(a, b, 200F, paint);
+        mCanvas.drawRect(maxX/6, maxY/6, maxX-(maxX/6), maxY-(maxY/6), paint);
     }
 
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
 
-        canvas.drawBitmap( mBitmap, 0, 0, mBitmapPaint);
-        canvas.drawPath( mPath,  mPaint);
-        canvas.drawPath( circlePath,  circlePaint);
+        canvas.drawBitmap(mBitmap, 0, 0, mBitmapPaint);
+        canvas.drawPath(mPath, mPaint);
+        canvas.drawPath(circlePath, circlePaint);
     }
 
     private float mX, mY;
     private static final float TOUCH_TOLERANCE = 4;
+
     private void touch_start(float x, float y) {
 
-        if(clearOn){
+        if (clearOn) {
             clearDrawing();
         }
         mPath.reset();
@@ -190,7 +218,7 @@ public class DrawingView extends View {
         float dx = Math.abs(x - mX);
         float dy = Math.abs(y - mY);
         if (dx >= TOUCH_TOLERANCE || dy >= TOUCH_TOLERANCE) {
-            mPath.quadTo(mX, mY, (x + mX)/2, (y + mY)/2);
+            mPath.quadTo(mX, mY, (x + mX) / 2, (y + mY) / 2);
             mX = x;
             mY = y;
 
@@ -203,7 +231,7 @@ public class DrawingView extends View {
         mPath.lineTo(mX, mY);
         circlePath.reset();
         // commit the path to our offscreen
-        mCanvas.drawPath(mPath,  mPaint);
+        mCanvas.drawPath(mPath, mPaint);
         // kill this so we don't double draw
         mPath.reset();
         clearOn = true;
@@ -225,9 +253,9 @@ public class DrawingView extends View {
             case MotionEvent.ACTION_DOWN:
 
                 to = true;
-                timeStampStart = System.nanoTime()/1000000;
+                timeStampStart = System.nanoTime() / 1000000;
 
-                if(xHold.size() != 0){
+                if (xHold.size() != 0) {
                     xHold.clear();
                     yHold.clear();
                     timeHold.clear();
@@ -249,7 +277,6 @@ public class DrawingView extends View {
                 invalidate();
                 break;
             case MotionEvent.ACTION_UP:
-
 
                 long timeStampEnd = System.nanoTime() / 1000000;
                 @SuppressWarnings("UnusedAssignment") long timeDifferenceTotal = timeStampEnd - timeStampStart;
@@ -278,10 +305,10 @@ public class DrawingView extends View {
 
                 adamsMath();
                 sendMyOscMessage();
+
             }
 
         }).start();
-
 
         return true;
     }
@@ -289,11 +316,8 @@ public class DrawingView extends View {
     public void clearDrawing() {
         //clear canvas
         setDrawingCacheEnabled(false);
-        // don't forget that one and the match below,
-        // or you just keep getting a duplicate when you save.
 
         onSizeChanged(width, height, width, height);
-
         setDrawingCacheEnabled(true);
     }
 
@@ -306,66 +330,66 @@ public class DrawingView extends View {
             int i = 0;
             // int i = xHold.size();
             // i--;
-            final long now1 = System.nanoTime()/1000000;
+            final long now1 = System.nanoTime() / 1000000;
             long now2 = 0;
 
             @Override
             public void run() {
                 int pathSize = xHold.size();
 
-                while(i < pathSize) {
+                if (1==1) {          //DO THIS!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                    while (i < pathSize) {
 
-                    //                       touch_start(xHold.get(i), yHold.get(i));
-//                        invalidate();
+                            //touch_start(xHold.get(i), yHold.get(i));
+                            //invalidate();
 
-                    //  while(i >= 0){
-                    now2 = System.nanoTime()/1000000;
+                            //  while(i >= 0){
+                        now2 = System.nanoTime() / 1000000;
 
-                    if(pathSize == 0){
-                        // to = true;
-                        //break;
+                        if (pathSize == 0) {
+                            // to = true;
+                            //break;
+                        } else if (now2 - now1 == timeHold.get(i)) {
+                            x1 = xHold.get(i);
+                            y1 = yHold.get(i);
+                            //touch_move(xHold.get(i), yHold.get(i));
+                            //invalidate();
+
+                            x1 = normalizeX(x1);
+                            y1 = normalizeY(y1);
+
+                            adamsMath();
+                            sendMyOscMessage();
+
+                            //   Log.d("size: ", Integer.toString(xHold.size()));
+                            //   Log.d("xHold: ", Float.toString(xHold.get(i)));
+                            //   Log.d("TimeHold: ", Float.toString(timeHold.get(i)));
+                            //   Log.d("now: ", Long.toString(now2-now1));
+                            i++;
+
+                            // i--;
+                            // float sum = getDistance(xRaw, yRaw, ev);
+                            //  Log.d("distance", Float.toString(sum));
+
+                        }
+
                     }
-
-                    else if (now2 - now1 == timeHold.get(i)) {
-                        x1 = xHold.get(i);
-                        y1 = yHold.get(i);
-//                            touch_move(xHold.get(i), yHold.get(i));
-//                            invalidate();
-
-                        x1 = normalizeX(x1);
-                        y1 = normalizeY(y1);
-
-                        adamsMath();
-                        sendMyOscMessage();
-
-                        //   Log.d("size: ", Integer.toString(xHold.size()));
-                        //   Log.d("xHold: ", Float.toString(xHold.get(i)));
-                        //   Log.d("TimeHold: ", Float.toString(timeHold.get(i)));
-                        //   Log.d("now: ", Long.toString(now2-now1));
-                        i++;
-
-                        // i--;
-                        // float sum = getDistance(xRaw, yRaw, ev);
-                        //  Log.d("distance", Float.toString(sum));
-
-                    }
-
-                }
-                if(!to){
-                    try {
-                        printDataFile();
-                    }
-                    catch (Exception e) {
-                        e.printStackTrace();
+                    if (!to) {
+                        try {
+                            printDataFile();
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
                     }
                 }
             }
         }).start();
+
     }
 
     //set OSC UDP Port Connection
 
-    private void setConnection(){
+    private void setConnection() {
         try {
             targetIP = InetAddress.getByName("192.168.0.100");
             //targetIP = InetAddress.getLocalHost();
@@ -377,13 +401,13 @@ public class DrawingView extends View {
 
         try {
             sender1 = new OSCPortOut(targetIP, portNumber);
-            sender2 = new OSCPortOut(targetIP, portNumber+1);
-            sender3 = new OSCPortOut(targetIP, portNumber+2);
-            sender4 = new OSCPortOut(targetIP, portNumber+3);
-            sender5 = new OSCPortOut(targetIP, portNumber+4);
-            sender6 = new OSCPortOut(targetIP, portNumber+5);
-            sender7 = new OSCPortOut(targetIP, portNumber+6);
-            sender8 = new OSCPortOut(targetIP, portNumber+7);//------set up outgoing ------
+            sender2 = new OSCPortOut(targetIP, portNumber + 1);
+            sender3 = new OSCPortOut(targetIP, portNumber + 2);
+            sender4 = new OSCPortOut(targetIP, portNumber + 3);
+            sender5 = new OSCPortOut(targetIP, portNumber + 4);
+            sender6 = new OSCPortOut(targetIP, portNumber + 5);
+            sender7 = new OSCPortOut(targetIP, portNumber + 6);
+            sender8 = new OSCPortOut(targetIP, portNumber + 7);//------set up outgoing ------
         } catch (SocketException e) {
             e.printStackTrace();
             // toast(getString(R.string.notConnecting));
@@ -394,8 +418,7 @@ public class DrawingView extends View {
 
     //send OSC messages
 
-    private void sendMyOscMessage(){
-
+    private void sendMyOscMessage() {
 
 
         OSCMessage msgX1 = new OSCMessage();
@@ -516,43 +539,42 @@ public class DrawingView extends View {
 
     private float normalizeX(float n) {
 
-        n = n/(maxX>>1)-1;
+        n = n / (maxX >> 1) - 1;
 
         return n;
     }
-    private float normalizeY(float n){
 
-        n = (n/(maxY>>1)-1)*(-1);
+    private float normalizeY(float n) {
+
+        n = (n / (maxY >> 1) - 1) * (-1);
 
         return n;
     }
 
     //Rotates {(x2,y2), (x3,y3)...(x8,y8)} by 45 degrees
 
-    private void adamsMath(){
+    private void adamsMath() {
 
-        x2= (x1*(CNeg315))-(y1*(SNeg315));
-        y2= (x1*(SNeg315)+(y1*(CNeg315)));
+        x2 = (x1 * (CNeg315)) - (y1 * (SNeg315));
+        y2 = (x1 * (SNeg315) + (y1 * (CNeg315)));
 
-        x3= y1;
-        y3= x1*(-1);
+        x3 = y1;
+        y3 = x1 * (-1);
 
-        x4= (x1*(C180))-(y1*(S180));
-        y4= (x1*(S180)+(y1*(C180)));
+        x4 = (x1 * (C180)) - (y1 * (S180));
+        y4 = (x1 * (S180) + (y1 * (C180)));
 
-        x5 = (x1*(CNeg135))-(y1*(SNeg135));
-        y5 = (x1*(SNeg135)+(y1*(CNeg135)));
+        x5 = (x1 * (CNeg135)) - (y1 * (SNeg135));
+        y5 = (x1 * (SNeg135) + (y1 * (CNeg135)));
 
-        x6 = x2*(-1);
-        y6 = y2*(-1);
+        x6 = x2 * (-1);
+        y6 = y2 * (-1);
 
-        x7= y1*(-1);
-        y7= x1;
+        x7 = y1 * (-1);
+        y7 = x1;
 
-        x8= (x1*(C315))-(y1*(S315));
-        y8= (x1*(S315)+(y1*(C315)));
+        x8 = (x1 * (C315)) - (y1 * (S315));
+        y8 = (x1 * (S315) + (y1 * (C315)));
 
     }
-
-
 }

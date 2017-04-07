@@ -20,8 +20,9 @@ public class DrawActivity2 extends Activity {
         }
 
     public void clearCanvas(View v) {
+
         dv.clearDrawing();
-    }
+        }
     }
 
 
