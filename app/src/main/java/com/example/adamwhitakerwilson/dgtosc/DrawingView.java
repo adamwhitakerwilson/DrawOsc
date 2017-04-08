@@ -26,6 +26,8 @@ import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  * Created by adamwhitakerwilson on 2017-04-04.
@@ -240,6 +242,12 @@ public class DrawingView extends View {
     private void touch_move(float x, float y) {
         float dx = Math.abs(x - mX);
         float dy = Math.abs(y - mY);
+        try {
+            Thread.sleep(16);
+            printDataFile();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         if (dx >= TOUCH_TOLERANCE || dy >= TOUCH_TOLERANCE) {
             mPath.quadTo(mX, mY, (x + mX) / 2, (y + mY) / 2);
             mX = x;
@@ -345,7 +353,7 @@ public class DrawingView extends View {
     //Looper
 
     public void printDataFile() {
-
+        System.gc();
         if(up) {
 
             new Thread(new Runnable() {
@@ -353,22 +361,64 @@ public class DrawingView extends View {
                 int i = 0;
                 // int i = xHold.size();
                 // i--;
-                final long now1 = System.nanoTime() / 1000000;
+
                 long now2 = 0;
+
 
                 @Override
                 public void run() {
                     int pathSize = xHold.size();
                     //    Log.d("size: ", Long.toString(pathSize));
+/*
+                    int delay = 16;   // delay for 5 sec.
+                    final int interval = 16;  // iterate every sec.
+                    Timer timer = new Timer();
 
+
+
+                    timer.scheduleAtFixedRate(new TimerTask() {
+                        int i = 0;
+                        public void run() {
+                            if(i == xHold.size()) {
+                                i = 0;
+                            }
+                            if (now2 - now1 == timeHold.get(i)) {
+                                x1 = xHold.get(i);
+                                y1 = yHold.get(i);
+
+                                x1 = normalizeX(x1);
+                                y1 = normalizeY(y1);
+
+                                adamsMath();
+                                sendMyOscMessage();
+                                Log.d("osc: ", "sent");
+                                i++;
+                            }
+
+                            Log.d("xLoop: ", Float.toString(xHold.get(i)));
+                            Log.d("yLoop: ", Float.toString(yHold.get(i)));
+                        //    Log.d("timeLoop: ", Integer.toString(timeHold.get(i)));
+                            i++;
+                        }
+                    }, delay, interval);
+
+*/
+
+
+
+                    long now1 = System.nanoTime() / 1000000;
                     while (i < pathSize) {
                         if(!up){
+                        i = 0;
 
                             break;
                         }
-                        now2 = System.nanoTime() / 1000000;
 
-                        if (now2 - now1 == timeHold.get(i)) {
+                        now2 = System.nanoTime() / 1000000;
+                        long nd = now2-now1;
+                       float tmh = timeHold.get(i);
+
+                        if (nd == tmh) {
                             x1 = xHold.get(i);
                             y1 = yHold.get(i);
 
@@ -376,13 +426,17 @@ public class DrawingView extends View {
                             y1 = normalizeY(y1);
 
                             adamsMath();
+
                             sendMyOscMessage();
+                          //  Log.d("osc: ", "sent");
 
                             i++;
                         }
                     }
+                    i=0;
                     if (up) {
                         try {
+                            Thread.sleep(16);
                             printDataFile();
                         } catch (Exception e) {
                             e.printStackTrace();
@@ -406,7 +460,7 @@ public class DrawingView extends View {
         }
 
         try {
-            sender1 = new OSCPortOut(targetIP, portNumber);
+            //sender1 = new OSCPortOut(targetIP, portNumber);
             sender2 = new OSCPortOut(targetIP, portNumber + 1);
             sender3 = new OSCPortOut(targetIP, portNumber + 2);
             sender4 = new OSCPortOut(targetIP, portNumber + 3);
@@ -414,10 +468,12 @@ public class DrawingView extends View {
             sender6 = new OSCPortOut(targetIP, portNumber + 5);
             sender7 = new OSCPortOut(targetIP, portNumber + 6);
             sender8 = new OSCPortOut(targetIP, portNumber + 7);//------set up outgoing ------
+
         } catch (SocketException e) {
             e.printStackTrace();
             // toast(getString(R.string.notConnecting));
         }
+
 
     }
 
@@ -426,17 +482,22 @@ public class DrawingView extends View {
 
     private void sendMyOscMessage() {
 
-        OSCMessage msgX1 = new OSCMessage();
-        msgX1.setAddress("/X_1");
-        msgX1.addArgument(x1);
+        try {
+            sender1 = new OSCPortOut(targetIP, portNumber);
 
-        // Log.d("x1/maxX: ", Float.toString(x1));
+            OSCMessage msgX1 = new OSCMessage();
+            msgX1.setAddress("/X_1");
+            msgX1.addArgument(x1);
 
-        OSCMessage msgY1 = new OSCMessage();
-        msgY1.setAddress("/Y_1");
-        msgY1.addArgument(y1);
+            // Log.d("x1/maxX: ", Float.toString(x1));
 
-        OSCMessage msgX2 = new OSCMessage();
+            OSCMessage msgY1 = new OSCMessage();
+            msgY1.setAddress("/Y_1");
+            msgY1.addArgument(y1);
+
+
+
+    /*    OSCMessage msgX2 = new OSCMessage();
         msgX2.setAddress("/X_2");
         msgX2.addArgument(x2);
 
@@ -507,13 +568,16 @@ public class DrawingView extends View {
         msgY8.setAddress("/Y_8");
         msgY8.addArgument(y8);
 
+*/
 
-        try {
 
-            sender1.send(msgX1);
-            sender1.send(msgY1);
 
-            sender2.send(msgX2);
+                sender1.send(msgX1);
+                sender1.send(msgY1);
+            sender1 = null;
+
+
+      /*      sender2.send(msgX2);
             sender2.send(msgY2);
 
             sender3.send(msgX3);
@@ -532,11 +596,12 @@ public class DrawingView extends View {
             sender7.send(msgY7);
 
             sender8.send(msgX8);
-            sender8.send(msgY8);
+            sender8.send(msgY8);*/
 
-        } catch (Exception ignored) {
 
-        }
+            } catch (Exception e) {
+
+            }
 
     }
 
