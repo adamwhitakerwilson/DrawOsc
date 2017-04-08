@@ -10,6 +10,7 @@ import android.graphics.Point;
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.Display;
 import android.view.MotionEvent;
 import android.view.View;
@@ -86,6 +87,7 @@ public class DrawingView extends View {
     //triggers
     private boolean to = false;
     private boolean clearOn = false;
+    private  boolean up = true;
 
     //paints
     private Paint mPaint;
@@ -167,7 +169,7 @@ public class DrawingView extends View {
         width = w;      // don't forget these
         height = h;
 
-        final float a, b, c, d;
+        final float a, b;
 
         a = maxX/2;
 
@@ -204,6 +206,27 @@ public class DrawingView extends View {
 
     private void touch_start(float x, float y) {
 
+        x1 = x;
+        y1 = y;
+        up = false;
+
+        //sleep so looper has time to know that up is false
+        try {
+            Thread.sleep(16);
+            printDataFile();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        to = true;
+        timeStampStart = System.nanoTime() / 1000000;
+
+        if (xHold.size() != 0) {
+            xHold.clear();
+            yHold.clear();
+            timeHold.clear();
+        }
+
         if (clearOn) {
             clearDrawing();
         }
@@ -221,10 +244,35 @@ public class DrawingView extends View {
             mPath.quadTo(mX, mY, (x + mX) / 2, (y + mY) / 2);
             mX = x;
             mY = y;
-
+            x1 = x;
+            y1 = y;
             circlePath.reset();
             circlePath.addCircle(mX, mY, 30, Path.Direction.CW);
+
+
+            long timeStampMove = System.nanoTime() / 1000000;
+            long timeDifferenceMove = timeStampMove - timeStampStart;
+            xHold.add(x);
+            yHold.add(y);
+            timeHold.add(timeDifferenceMove);
+         //   Log.d("x: ", Float.toString(x));
+
+            // Start the thread that sends messages
+
+            new Thread(new Runnable() {
+                public void run() {
+
+                    x1 = normalizeX(x1);
+                    y1 = normalizeY(y1);
+
+                    adamsMath();
+                    sendMyOscMessage();
+                }
+
+            }).start();
+
         }
+
     }
 
     private void touch_up() {
@@ -235,16 +283,23 @@ public class DrawingView extends View {
         // kill this so we don't double draw
         mPath.reset();
         clearOn = true;
+        up = true;
 
+        long timeStampEnd = System.nanoTime() / 1000000;
+        @SuppressWarnings("UnusedAssignment") long timeDifferenceTotal = timeStampEnd - timeStampStart;
+        to = false;
+        try {
+            Thread.sleep(20);
+            printDataFile();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
+
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
 
-        x1 = event.getX();
-        y1 = event.getY();
-        float xRaw = event.getX();
-        float yRaw = event.getY();
 
         float x = event.getX();
         float y = event.getY();
@@ -252,65 +307,31 @@ public class DrawingView extends View {
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
 
-                to = true;
-                timeStampStart = System.nanoTime() / 1000000;
 
-                if (xHold.size() != 0) {
-                    xHold.clear();
-                    yHold.clear();
-                    timeHold.clear();
-                }
-
-                clearDrawing();
+                // clearDrawing();
                 touch_start(x, y);
                 invalidate();
                 break;
             case MotionEvent.ACTION_MOVE:
 
-                long timeStampMove = System.nanoTime() / 1000000;
-                long timeDifferenceMove = timeStampMove - timeStampStart;
-                xHold.add(xRaw);
-                yHold.add(yRaw);
-                timeHold.add(timeDifferenceMove);
 
+                //  Log.d("xRaw: ", Float.toString(xRaw));
                 touch_move(x, y);
                 invalidate();
                 break;
             case MotionEvent.ACTION_UP:
 
-                long timeStampEnd = System.nanoTime() / 1000000;
-                @SuppressWarnings("UnusedAssignment") long timeDifferenceTotal = timeStampEnd - timeStampStart;
-                to = false;
 
                 touch_up();
                 invalidate();
 
-                try {
-                    Thread.sleep(200);
-                    printDataFile();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
 
                 break;
         }
 
-        // Start the thread that sends messages
-
-        new Thread(new Runnable() {
-            public void run() {
-
-                x1 = normalizeX(x1);
-                y1 = normalizeY(y1);
-
-                adamsMath();
-                sendMyOscMessage();
-
-            }
-
-        }).start();
 
         return true;
+
     }
 
     public void clearDrawing() {
@@ -325,35 +346,31 @@ public class DrawingView extends View {
 
     public void printDataFile() {
 
-        new Thread(new Runnable() {
+        if(up) {
 
-            int i = 0;
-            // int i = xHold.size();
-            // i--;
-            final long now1 = System.nanoTime() / 1000000;
-            long now2 = 0;
+            new Thread(new Runnable() {
 
-            @Override
-            public void run() {
-                int pathSize = xHold.size();
+                int i = 0;
+                // int i = xHold.size();
+                // i--;
+                final long now1 = System.nanoTime() / 1000000;
+                long now2 = 0;
 
-                if (1==1) {          //DO THIS!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                @Override
+                public void run() {
+                    int pathSize = xHold.size();
+                    //    Log.d("size: ", Long.toString(pathSize));
+
                     while (i < pathSize) {
+                        if(!up){
 
-                            //touch_start(xHold.get(i), yHold.get(i));
-                            //invalidate();
-
-                            //  while(i >= 0){
+                            break;
+                        }
                         now2 = System.nanoTime() / 1000000;
 
-                        if (pathSize == 0) {
-                            // to = true;
-                            //break;
-                        } else if (now2 - now1 == timeHold.get(i)) {
+                        if (now2 - now1 == timeHold.get(i)) {
                             x1 = xHold.get(i);
                             y1 = yHold.get(i);
-                            //touch_move(xHold.get(i), yHold.get(i));
-                            //invalidate();
 
                             x1 = normalizeX(x1);
                             y1 = normalizeY(y1);
@@ -361,20 +378,10 @@ public class DrawingView extends View {
                             adamsMath();
                             sendMyOscMessage();
 
-                            //   Log.d("size: ", Integer.toString(xHold.size()));
-                            //   Log.d("xHold: ", Float.toString(xHold.get(i)));
-                            //   Log.d("TimeHold: ", Float.toString(timeHold.get(i)));
-                            //   Log.d("now: ", Long.toString(now2-now1));
                             i++;
-
-                            // i--;
-                            // float sum = getDistance(xRaw, yRaw, ev);
-                            //  Log.d("distance", Float.toString(sum));
-
                         }
-
                     }
-                    if (!to) {
+                    if (up) {
                         try {
                             printDataFile();
                         } catch (Exception e) {
@@ -382,16 +389,15 @@ public class DrawingView extends View {
                         }
                     }
                 }
-            }
-        }).start();
-
+            }).start();
+        }
     }
 
     //set OSC UDP Port Connection
 
     private void setConnection() {
         try {
-            targetIP = InetAddress.getByName("192.168.0.100");
+            targetIP = InetAddress.getByName("192.168.0.104");
             //targetIP = InetAddress.getLocalHost();
 
         } catch (UnknownHostException e) {
@@ -419,7 +425,6 @@ public class DrawingView extends View {
     //send OSC messages
 
     private void sendMyOscMessage() {
-
 
         OSCMessage msgX1 = new OSCMessage();
         msgX1.setAddress("/X_1");
