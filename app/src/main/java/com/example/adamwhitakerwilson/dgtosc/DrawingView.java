@@ -1,12 +1,14 @@
 package com.example.adamwhitakerwilson.dgtosc;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Point;
+import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
@@ -36,6 +38,7 @@ import java.util.TimerTask;
 //Custom View
 
 public class DrawingView extends View {
+
 
     //network variables
     private OSCPortOut sender1 = null;
@@ -75,6 +78,7 @@ public class DrawingView extends View {
     //time
     private final List<Long> timeHold = new ArrayList<>();
     private long timeStampStart;
+    long timeDifferenceTotal;
 
     //maths
     float CNeg315 = (float) Math.cos(-315);
@@ -90,6 +94,7 @@ public class DrawingView extends View {
     private boolean to = false;
     private boolean clearOn = false;
     private  boolean up = true;
+    private int radioId = 0;
 
     //paints
     private Paint mPaint;
@@ -111,14 +116,11 @@ public class DrawingView extends View {
     RadioButton forward;
     RadioButton backward;
     RadioButton backwardForward;
-
+    RadioGroup radioGroup;
 
     public DrawingView(Context context, AttributeSet attrs) {
         super(context, attrs);
 
-        forward = (RadioButton) findViewById(R.id.forward);
-        backward = (RadioButton) findViewById(R.id.backward);
-        backwardForward = (RadioButton) findViewById(R.id.backwardForward);
 
         mPath = new Path();
         mBitmapPaint = new Paint(Paint.DITHER_FLAG);
@@ -143,6 +145,12 @@ public class DrawingView extends View {
         setConnection();
 
         isInEditMode();
+
+    }
+
+    @Override
+    public Object getTag() {
+        return super.getTag();
     }
 
     @Override
@@ -263,7 +271,7 @@ public class DrawingView extends View {
             xHold.add(x);
             yHold.add(y);
             timeHold.add(timeDifferenceMove);
-         //   Log.d("x: ", Float.toString(x));
+           // Log.d("x: ", Float.toString(timeDifferenceMove));
 
             // Start the thread that sends messages
 
@@ -294,7 +302,7 @@ public class DrawingView extends View {
         up = true;
 
         long timeStampEnd = System.nanoTime() / 1000000;
-        @SuppressWarnings("UnusedAssignment") long timeDifferenceTotal = timeStampEnd - timeStampStart;
+        timeDifferenceTotal = timeStampEnd - timeStampStart;
         to = false;
         try {
             Thread.sleep(20);
@@ -303,6 +311,9 @@ public class DrawingView extends View {
             e.printStackTrace();
         }
     }
+
+
+
 
 
     @Override
@@ -359,15 +370,13 @@ public class DrawingView extends View {
             new Thread(new Runnable() {
 
                 int i = 0;
-                // int i = xHold.size();
-                // i--;
-
+                int i2 = 0;
                 long now2 = 0;
-
 
                 @Override
                 public void run() {
                     int pathSize = xHold.size();
+                    i2 = pathSize-1;
                     //    Log.d("size: ", Long.toString(pathSize));
 /*
                     int delay = 16;   // delay for 5 sec.
@@ -404,44 +413,168 @@ public class DrawingView extends View {
 
 */
 
+//backward forward
+if(1==1) {
+
+    long now1 = System.nanoTime() / 1000000;
+
+    while (i2 > -1) {
+
+        if (!up) {
+            i2 = pathSize - 1;
+            break;
+        }
+        float tmh;
+
+        if(i2 == 0){
+            tmh = timeDifferenceTotal;
+        }
+        else{
+            tmh = timeDifferenceTotal - timeHold.get(i2-1);
+        }
+
+        now2 = System.nanoTime() / 1000000;
+        long nd = now2 - now1;
+
+        if (nd == tmh) {
+            x1 = xHold.get(i2);
+            y1 = yHold.get(i2);
+
+            x1 = normalizeX(x1);
+            y1 = normalizeY(y1);
+
+            adamsMath();
+            sendMyOscMessage();
+            //  Log.d("osc: ", "sent");
+            i2--;
+        }
+    }
+    i = 0;
+    now1 = System.nanoTime() / 1000000;
+
+        while (i < pathSize) {
+            if (!up) {
+                i = 0;
+                break;
+            }
+            now2 = System.nanoTime() / 1000000;
+            long nd = now2 - now1;
+            float tmh = timeHold.get(i);
+
+            if (nd == tmh) {
+                x1 = xHold.get(i);
+                y1 = yHold.get(i);
+
+                x1 = normalizeX(x1);
+                y1 = normalizeY(y1);
+
+                adamsMath();
+                sendMyOscMessage();
+                //  Log.d("osc: ", "sent");
+                i++;
+            }
+        }
+       i2 = pathSize-1;
+        if (up) {
+            try {
+                Thread.sleep(16);
+                printDataFile();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+}
+
+//backward loop
+
+if(1==0) {
+
+    long now1 = System.nanoTime() / 1000000;
+    while (i2 > -1) {
+
+        if (!up) {
+            i2 = pathSize - 1;
+            break;
+        }
+
+        float tmh;
+
+        if(i2 == 0){
+            tmh = timeDifferenceTotal;
+        }
+        else{
+            tmh = timeDifferenceTotal - timeHold.get(i2-1);
+        }
+
+        now2 = System.nanoTime() / 1000000;
+        long nd = now2 - now1;
+
+        if (nd == tmh) {
+
+            x1 = xHold.get(i2);
+            y1 = yHold.get(i2);
+
+            x1 = normalizeX(x1);
+            y1 = normalizeY(y1);
+
+            adamsMath();
+            sendMyOscMessage();
+            //  Log.d("osc: ", "sent");
+            i2--;
+        }
+    }
+    i2 = pathSize-1;
+    if (up) {
+        try {
+            Thread.sleep(16);
+            printDataFile();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+}
+
+//forward loop
+
+if(1==0) {
 
 
-                    long now1 = System.nanoTime() / 1000000;
-                    while (i < pathSize) {
-                        if(!up){
-                        i = 0;
+    long now1 = System.nanoTime() / 1000000;
+    while (i < pathSize) {
+        if (!up) {
+            i = 0;
 
-                            break;
-                        }
+            break;
+        }
 
-                        now2 = System.nanoTime() / 1000000;
-                        long nd = now2-now1;
-                       float tmh = timeHold.get(i);
+        now2 = System.nanoTime() / 1000000;
+        long nd = now2 - now1;
+        float tmh = timeHold.get(i);
 
-                        if (nd == tmh) {
-                            x1 = xHold.get(i);
-                            y1 = yHold.get(i);
+        if (nd == tmh) {
+            x1 = xHold.get(i);
+            y1 = yHold.get(i);
 
-                            x1 = normalizeX(x1);
-                            y1 = normalizeY(y1);
+            x1 = normalizeX(x1);
+            y1 = normalizeY(y1);
 
-                            adamsMath();
+            adamsMath();
+            sendMyOscMessage();
+            //  Log.d("osc: ", "sent");
+            i++;
+        }
+    }
+    i = 0;
+    if (up) {
+        try {
+            Thread.sleep(16);
+            printDataFile();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
-                            sendMyOscMessage();
-                          //  Log.d("osc: ", "sent");
-
-                            i++;
-                        }
-                    }
-                    i=0;
-                    if (up) {
-                        try {
-                            Thread.sleep(16);
-                            printDataFile();
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                    }
+}
                 }
             }).start();
         }

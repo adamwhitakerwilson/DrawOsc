@@ -98,12 +98,11 @@ public class MainActivity extends AppCompatActivity {
                 }
                 else if (butRadio1.isChecked() && valid) {
                     //open draw activity
-              //      Intent intent = new Intent(v.getContext(), DrawActivity.class);
                     startActivity(intent);
                 }
                 else if (butRadio2.isChecked() && valid){
                     //open generate activity
-             //       Intent intent = new Intent(v.getContext(), GenerateActivity.class);
+
                     startActivity(intent);
                 }
                 else if (!valid){
