@@ -11,6 +11,7 @@ import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
@@ -24,23 +25,37 @@ import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 
-public class DrawActivity2 extends Activity{
+public class DrawActivity2 extends Activity {
     DrawingView dv;
     RadioButton forward;
     RadioButton backward;
     RadioButton backwardForward;
+    RadioButton out1, out2, out3, out4, out5, out6, out7;
     ToggleButton pause;
+    ToggleButton relationToggle;
     SeekBar speedBar;
 
-    private InetAddress targetIP;
-    private InetAddress targetIP2;
-    String targetIpStr;
-    int portNumber;
     int check;
     float spd;
 
+    String ip;
+    int port;
+    int outTrack = 0;
+
+    boolean relationTrigger;
+    boolean pauser;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Bundle extras = getIntent().getExtras();
+        if (extras != null) {
+            ip = extras.getString("ip");
+            port = extras.getInt("port");
+            Log.d("ip: ", ip);
+            Log.d("port: ", Integer.toString(port));
+            setPort(port);
+            setIp(ip);
+        }
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_draw2);
 
@@ -48,63 +63,61 @@ public class DrawActivity2 extends Activity{
         backward = (RadioButton) findViewById(R.id.backward);
         backwardForward = (RadioButton) findViewById(R.id.backwardForward);
         backwardForward.setChecked(true);
-        pause = (ToggleButton)findViewById(R.id.pauseButton);
-        speedBar = (SeekBar)findViewById(R.id.speed);
 
-        Bundle extras = getIntent().getExtras();
-        if (extras != null) {
-            targetIpStr = extras.getString("ip");
-            portNumber = extras.getInt("port");
-        }
-        setPort(portNumber);
-        setIp(targetIpStr);
 
+        pause = (ToggleButton) findViewById(R.id.pauseButton);
+
+        out1 = (RadioButton) findViewById(R.id.out1);
+        out2 = (RadioButton) findViewById(R.id.out2);
+        out3 = (RadioButton) findViewById(R.id.out3);
+        out4 = (RadioButton) findViewById(R.id.out4);
+        out5 = (RadioButton) findViewById(R.id.out5);
+        out6 = (RadioButton) findViewById(R.id.out6);
+        out7 = (RadioButton) findViewById(R.id.out7);
+
+
+        relationToggle = (ToggleButton) findViewById(R.id.relationButton);
 
         dv = (DrawingView) findViewById(R.id.signature_canvas);
 
 
-        speedBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener(){
-
+        relationToggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
-            public void onProgressChanged(SeekBar seekBar, int progress,
-                                          boolean fromUser) {
-                // TODO Auto-generated method stub
-              setSpeed(normalizeX((float)progress));
+            public void onCheckedChanged(CompoundButton toggleButton, boolean isChecked) {
+                Log.d("tog:", Boolean.toString(isChecked));
+                setRelationTrigger(isChecked);
+
             }
+        });
 
+        pause.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-                // TODO Auto-generated method stub
-            }
+            public void onCheckedChanged(CompoundButton toggleButton, boolean isChecked) {
+                Log.d("tog:", Boolean.toString(isChecked));
+                setPauser(isChecked);
 
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-                // TODO Auto-generated method stub
             }
         });
 
 
-
-
-    final RadioGroup radioGroup = (RadioGroup) findViewById(R.id.loopTypeRadioGroup);
-        radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener()
-        {
+        final RadioGroup radioGroup = (RadioGroup) findViewById(R.id.loopTypeRadioGroup);
+        radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(RadioGroup group, int checkedId) {
 
-                if(backward.isChecked()) {
-                  //  Log.d("Backward: ", Integer.toString(checkedId));
+                if (backward.isChecked()) {
+                    //  Log.d("Backward: ", Integer.toString(checkedId));
                     check = 2;
                     setSender(check);
                 }
-                if(backwardForward.isChecked()) {
-                  //  Log.d("BackwardForward: ", Integer.toString(checkedId));
+                if (backwardForward.isChecked()) {
+                    //  Log.d("BackwardForward: ", Integer.toString(checkedId));
                     check = 0;
                     setSender(check);
 
                 }
-                if(forward.isChecked()) {
-                  //  Log.d("Forward: ", Integer.toString(checkedId));
+                if (forward.isChecked()) {
+                    //  Log.d("Forward: ", Integer.toString(checkedId));
 
                     check = 1;
                     setSender(check);
@@ -115,47 +128,130 @@ public class DrawActivity2 extends Activity{
         });
 
 
-    }
-    public void setPort(int portNumber){
-        this.portNumber = portNumber;
-    }
-    public int getPort(){
-        return portNumber;
-    }
-    public void setIp(String targetIpStr){
-        this.targetIpStr = targetIpStr;
-    }
-    public String getIp(){
-        return targetIpStr;
-    }
-    private float normalizeX(float n) {
+        final RadioGroup radioGroup2 = (RadioGroup) findViewById(R.id.outputs);
+        radioGroup2.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(RadioGroup group, int checkedId) {
 
+
+                if (out1.isChecked()) {
+                    //  Log.d("BackwardForward: ", Integer.toString(checkedId));
+                    outTrack = 1;
+                    setTrack(outTrack);
+
+                }
+                if (out2.isChecked()) {
+                    //  Log.d("Backward: ", Integer.toString(checkedId));
+                    outTrack = 2;
+                    setTrack(outTrack);
+                }
+                if (out3.isChecked()) {
+                    //  Log.d("Forward: ", Integer.toString(checkedId));
+
+                    outTrack = 3;
+                    setTrack(outTrack);
+
+                }
+                if (out4.isChecked()) {
+                    //  Log.d("Forward: ", Integer.toString(checkedId));
+
+                    outTrack = 4;
+                    setTrack(outTrack);
+
+                }
+                if (out5.isChecked()) {
+                    //  Log.d("Forward: ", Integer.toString(checkedId));
+
+                    outTrack = 5;
+                    setTrack(outTrack);
+
+                }
+                if (out6.isChecked()) {
+                    //  Log.d("Forward: ", Integer.toString(checkedId));
+
+                    outTrack = 6;
+                    setTrack(outTrack);
+
+                }
+                if (out7.isChecked()) {
+                    //  Log.d("Forward: ", Integer.toString(checkedId));
+
+                    outTrack = 7;
+                    setTrack(outTrack);
+
+                }
+
+            }
+        });
+
+    }
+
+    public boolean getPauser() {
+        return pauser;
+    }
+
+    public void setPauser(boolean pauser) {
+        this.pauser = pauser;
+    }
+
+    public int getTrack() {
+        return outTrack;
+    }
+
+    public void setTrack(int outTrack) {
+        this.outTrack = outTrack;
+    }
+
+    public int getPort() {
+        return port;
+    }
+
+    public void setPort(int portNumber) {
+        this.port = portNumber;
+    }
+
+    public String getIp() {
+        return ip;
+    }
+
+    public void setIp(String targetIpStr) {
+        this.ip = targetIpStr;
+    }
+
+    private float normalizeX(float n) {
+        // seek max = 100
         n = n / (100 >> 1) - 1;
-//Log.d("seek: ", Float.toString(n));
         return n;
     }
 
-    public void setSender(int check){
-        this.check= check;
-    }
-
-    public int getSender(){
+    public int getSender() {
         return check;
     }
 
-    public void setSpeed(float spd){
+    public void setSender(int check) {
+        this.check = check;
+    }
+
+    public float getSpeed() {
+        return spd;
+    }
+
+    public void setSpeed(float spd) {
         this.spd = spd;
     }
 
-    public float getSpeed(){
-        return spd;
+    public boolean getRelationTrigger() {
+        return relationTrigger;
+    }
+
+    public void setRelationTrigger(boolean trigger) {
+        this.relationTrigger = trigger;
     }
 
     public void clearCanvas(View v) {
 
         dv.clearDrawing();
-        }
-
+    }
 
 
 }

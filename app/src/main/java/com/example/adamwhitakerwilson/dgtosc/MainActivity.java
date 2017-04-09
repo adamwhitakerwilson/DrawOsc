@@ -12,29 +12,25 @@ import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import com.illposed.osc.OSCMessage;
 import com.illposed.osc.OSCPortOut;
+
 import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 
 public class MainActivity extends AppCompatActivity {
 
-    private RadioButton butRadio1;
-    private RadioButton butRadio2;
-
+    String targetIpStr;
     private EditText ipTx;
     private EditText portTx;
     private TextView validDisplay;
-
     private InetAddress targetIP;
     private String targetIPStr;
     private int portNumber;
     private OSCPortOut sender = null;
-
     private boolean valid = false;
-
-    String targetIpStr;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,19 +46,18 @@ public class MainActivity extends AppCompatActivity {
         validDisplay = (TextView) findViewById(R.id.textViewValidate);
 
 
-
 //Button Listeners
 
         butConnect.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v){
+            public void onClick(View v) {
 
                 validDisplay.setText("");
                 valid = false;
                 targetIPStr = ipTx.getText().toString();
                 portNumber = Integer.valueOf(portTx.getText().toString());
-                setPort(portNumber);
-                setIp(targetIPStr);
+                // setPort(portNumber);
+                //setIp(targetIPStr);
                 Log.d("IP str :  ", targetIPStr);
                 Log.d("Port:    ", Integer.toString(portNumber));
 
@@ -74,7 +69,7 @@ public class MainActivity extends AppCompatActivity {
 
                         setConnection();
                         valid = true;
-                       // toast("connected");
+                        // toast("connected");
                         //sendMyOscMessage();
 
                         //noinspection StatementWithEmptyBody
@@ -89,11 +84,11 @@ public class MainActivity extends AppCompatActivity {
 
         });
 
-        butNext.setOnClickListener(new View.OnClickListener(){
+        butNext.setOnClickListener(new View.OnClickListener() {
 
             @Override
-            public void onClick(View v){
-                Intent intent = new Intent(v.getContext(), DrawActivity2.class);
+            public void onClick(View v) {
+                Intent intent = new Intent(MainActivity.this, DrawActivity2.class);
                 intent.putExtra("port", portNumber);
                 intent.putExtra("ip", targetIPStr);
                 startActivity(intent);
@@ -101,10 +96,9 @@ public class MainActivity extends AppCompatActivity {
 
                 if (valid) {
                     //open draw activity
-                    sender.close();
+                    // sender.close();
                     startActivity(intent);
-                }
-                else if (!valid){
+                } else if (!valid) {
                     toast(getString(R.string.instruct));
                 }
 
@@ -123,7 +117,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     //displays a toast message
-    private void toast(String msg){
+    private void toast(String msg) {
         Context context = getApplicationContext();
         int duration = Toast.LENGTH_SHORT;
 
@@ -133,27 +127,27 @@ public class MainActivity extends AppCompatActivity {
 
     //set OSC UDP Port Connection
 
-    private void setConnection(){
+    private void setConnection() {
         try {
             targetIP = InetAddress.getByName(targetIPStr);
             //targetIP = InetAddress.getLocalHost();
 
         } catch (UnknownHostException e) {
             e.printStackTrace();
-        //toast(getString(R.string.notConnecting));
+            //toast(getString(R.string.notConnecting));
         }
 
         try {
             sender = new OSCPortOut(targetIP, portNumber);//------set up outgoing ------
         } catch (SocketException e) {
             e.printStackTrace();
-           // toast(getString(R.string.notConnecting));
+            // toast(getString(R.string.notConnecting));
         }
 
     }
     //send OSC messages
 
-    public void sendMyOscMessage(){
+    public void sendMyOscMessage() {
         float x1 = (float) 0.0; //dummy
         float y1 = (float) 0.0;//dummy
 
@@ -178,17 +172,21 @@ public class MainActivity extends AppCompatActivity {
 
 
     }
-    public void setPort(int portNumber){
-        this.portNumber = portNumber;
-    }
-    public int getPort(){
+
+    public int getPort() {
         return portNumber;
     }
-    public void setIp(String targetIp){
-        this.targetIpStr = targetIp;
+
+    public void setPort(int portNumber) {
+        this.portNumber = portNumber;
     }
-    public String getIp(){
+
+    public String getIp() {
         return targetIpStr;
+    }
+
+    public void setIp(String targetIp) {
+        this.targetIpStr = targetIp;
     }
 
 }

@@ -26,6 +26,15 @@
     <string name="loopType">Loop Type</string>
     <string name="instructions">Hello, im am a bunch of instructions...... </string>
 
+    <string name="out1">Speed</string>
+    <string name="out2">Speed</string>
+    <string name="out3">Speed</string>
+    <string name="out4">Speed</string>
+    <string name="out5">Speed</string>
+    <string name="out6">Speed</string>
+    <string name="out7">Speed</string>
+
+
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment" tools:ignore="UnusedResources">Hello blank fragment</string>
     <string name="title_activity_draw2">DrawActivity2</string>

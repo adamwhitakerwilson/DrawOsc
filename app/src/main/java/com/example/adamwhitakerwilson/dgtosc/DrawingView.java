@@ -43,6 +43,40 @@ import java.util.TimerTask;
 public class DrawingView extends View {
 
 
+    private static final float TOUCH_TOLERANCE = 4;
+    private final List<Float> xHold = new ArrayList<>();
+    private final List<Float> yHold = new ArrayList<>();
+    //time
+    private final List<Long> timeHold = new ArrayList<>();
+    private final Path mPath;
+    private final Paint mBitmapPaint;
+    private final Paint circlePaint;
+    private final Path circlePath;
+    //measurements
+    public int width;
+    public int height;
+    long timeDifferenceTotal;
+    //maths
+    float CNeg315 = (float) Math.cos(-315);
+    float SNeg315 = (float) Math.sin(-315);
+    float C180 = (float) Math.cos(180);
+    float S180 = (float) Math.sin(180);
+    float CNeg135 = (float) Math.cos(-135);
+    float SNeg135 = (float) Math.sin(-135);
+    float C315 = (float) Math.cos(315);
+    float S315 = (float) Math.sin(315);
+    int radio;
+    float speed;
+    int radioTrack = 1;
+    boolean relation;
+    int maxX = 500;
+    int maxY = 250;
+    //GUIs
+    RadioButton forward;
+    RadioButton backward;
+    RadioButton backwardForward;
+    RadioGroup radioGroup;
+    long timeDifferenceMove;
     //network variables
     private OSCPortOut sender1 = null;
     private OSCPortOut sender2 = null;
@@ -52,11 +86,7 @@ public class DrawingView extends View {
     private OSCPortOut sender6 = null;
     private OSCPortOut sender7 = null;
     private OSCPortOut sender8 = null;
-    private OSCPortIn  receiver;
     private InetAddress targetIP;
-    private String targetIPStr;
-    private int portNumber;
-
     //points
     private float x1;
     private float y1;
@@ -74,57 +104,17 @@ public class DrawingView extends View {
     private float y7;
     private float x8;
     private float y8;
-
-    private final List<Float> xHold = new ArrayList<>();
-    private final List<Float> yHold = new ArrayList<>();
-
-    //time
-    private final List<Long> timeHold = new ArrayList<>();
     private long timeStampStart;
-    long timeDifferenceTotal;
-
-    //maths
-    float CNeg315 = (float) Math.cos(-315);
-    float SNeg315 = (float) Math.sin(-315);
-    float C180 = (float) Math.cos(180);
-    float S180 = (float) Math.sin(180);
-    float CNeg135 = (float) Math.cos(-135);
-    float SNeg135 = (float) Math.sin(-135);
-    float C315 = (float) Math.cos(315);
-    float S315 = (float) Math.sin(315);
-
     //triggers
     private boolean to = false;
     private boolean clearOn = false;
     private boolean up = true;
     private int radioId = 0;
-
-    int radio;
-    float speed;
-
     //paints
     private Paint mPaint;
     private Bitmap mBitmap;
     private Canvas mCanvas;
-    private final Path mPath;
-    private final Paint mBitmapPaint;
-    private final Paint circlePaint;
-    private final Path circlePath;
-
-    //measurements
-    public int width;
-    public int height;
-
-    int maxX = 500;
-    int maxY = 250;
-
-    //GUIs
-    RadioButton forward;
-    RadioButton backward;
-    RadioButton backwardForward;
-    RadioGroup radioGroup;
-
-
+    private float mX, mY;
 
     public DrawingView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -149,16 +139,10 @@ public class DrawingView extends View {
         mPaint.setStrokeCap(Paint.Cap.ROUND);
         mPaint.setStrokeWidth(2);
 
-      //  portNumber = ((DrawActivity2) getContext()).getPort();
-        targetIPStr = ((DrawActivity2) getContext()).getIp();
-      //  Log.d("port: ", Integer.toString(portNumber));
-//        Log.d("IP: ", targetIPStr);
-        portNumber = 8800;
+
         setConnection();
 
         isInEditMode();
-
-
 
 
     }
@@ -225,10 +209,6 @@ public class DrawingView extends View {
         canvas.drawPath(mPath, mPaint);
         canvas.drawPath(circlePath, circlePaint);
     }
-
-    private float mX, mY;
-    private static final float TOUCH_TOLERANCE = 4;
-    long timeDifferenceMove;
 
     private void touch_start(float x, float y) {
 
@@ -369,7 +349,6 @@ public class DrawingView extends View {
     }
 
 
-
     public void clearDrawing() {
         //clear canvas
         setDrawingCacheEnabled(false);
@@ -385,8 +364,9 @@ public class DrawingView extends View {
 
         radio = ((DrawActivity2) getContext()).getSender();
         speed = ((DrawActivity2) getContext()).getSpeed();
-       // Log.d("speed", Float.toString(speed));
-       // Log.d("sender", Integer.toString(radio));
+        //  Log.d("speed", Float.toString(speed));
+        //Log.d("loopPort: ", Integer.toString(portNumber));
+        // Log.d("sender", Integer.toString(radio));
 
         try {
             Thread.sleep(16);
@@ -406,41 +386,6 @@ public class DrawingView extends View {
                 public void run() {
                     int pathSize = xHold.size();
                     i2 = pathSize - 1;
-                    //    Log.d("size: ", Long.toString(pathSize));
-/*
-                    int delay = 16;   // delay for 5 sec.
-                    final int interval = 16;  // iterate every sec.
-                    Timer timer = new Timer();
-
-
-
-                    timer.scheduleAtFixedRate(new TimerTask() {
-                        int i = 0;
-                        public void run() {
-                            if(i == xHold.size()) {
-                                i = 0;
-                            }
-                            if (now2 - now1 == timeHold.get(i)) {
-                                x1 = xHold.get(i);
-                                y1 = yHold.get(i);
-
-                                x1 = normalizeX(x1);
-                                y1 = normalizeY(y1);
-
-                                adamsMath();
-                                sendMyOscMessage();
-                                Log.d("osc: ", "sent");
-                                i++;
-                            }
-
-                            Log.d("xLoop: ", Float.toString(xHold.get(i)));
-                            Log.d("yLoop: ", Float.toString(yHold.get(i)));
-                        //    Log.d("timeLoop: ", Integer.toString(timeHold.get(i)));
-                            i++;
-                        }
-                    }, delay, interval);
-
-*/
 
 //backward forward
                     if (radio == 0) {
@@ -566,7 +511,6 @@ public class DrawingView extends View {
 
                     if (radio == 1) {
 
-
                         long now1 = System.nanoTime() / 1000000;
                         while (i < pathSize) {
                             if (!up) {
@@ -611,8 +555,13 @@ public class DrawingView extends View {
     //set OSC UDP Port Connection
 
     private void setConnection() {
+        int portNumber = ((DrawActivity2) getContext()).getPort();
+        String targetIPStr = ((DrawActivity2) getContext()).getIp();
+       // Log.d("View port: ", Integer.toString(portNumber));
+      //  Log.d("View IP: ", "" + targetIPStr);
+        //portNumber = 8800;
         try {
-            targetIP = InetAddress.getByName("192.168.0.104");
+            targetIP = InetAddress.getByName(targetIPStr);
             //targetIP = InetAddress.getLocalHost();
 
         } catch (UnknownHostException e) {
@@ -635,7 +584,6 @@ public class DrawingView extends View {
             // toast(getString(R.string.notConnecting));
         }
 
-
     }
 
 
@@ -643,12 +591,15 @@ public class DrawingView extends View {
 
     private void sendMyOscMessage() {
 
+
         try {
 
-
+            if(!((DrawActivity2) getContext()).getPauser()){
+            radioTrack = ((DrawActivity2) getContext()).getTrack();
             OSCMessage msgX1 = new OSCMessage();
             msgX1.setAddress("/X_1");
             msgX1.addArgument(x1);
+            // Log.d("radioTrack: ", Integer.toString(radioTrack));
 
             // Log.d("x1/maxX: ", Float.toString(x1));
 
@@ -656,107 +607,260 @@ public class DrawingView extends View {
             msgY1.setAddress("/Y_1");
             msgY1.addArgument(y1);
 
-
-
-  /*      OSCMessage msgX2 = new OSCMessage();
-        msgX2.setAddress("/X_2");
-        msgX2.addArgument(x2);
-
-        // Log.d("x1/maxX: ", Float.toString(x1));
-
-        OSCMessage msgY2 = new OSCMessage();
-        msgY2.setAddress("/Y_2");
-        msgY2.addArgument(y2);
-
-        OSCMessage msgX3 = new OSCMessage();
-        msgX3.setAddress("/X_3");
-        msgX3.addArgument(x3);
-
-        // Log.d("x1/maxX: ", Float.toString(x1));
-
-        OSCMessage msgY3 = new OSCMessage();
-        msgY3.setAddress("/Y_3");
-        msgY3.addArgument(y3);
-
-        OSCMessage msgX4 = new OSCMessage();
-        msgX4.setAddress("/X_4");
-        msgX4.addArgument(x4);
-
-        // Log.d("x1/maxX: ", Float.toString(x1));
-
-        OSCMessage msgY4 = new OSCMessage();
-        msgY4.setAddress("/Y_4");
-        msgY4.addArgument(y4);
-
-
-        OSCMessage msgX5 = new OSCMessage();
-        msgX5.setAddress("/X_5");
-        msgX5.addArgument(x5);
-
-        // Log.d("x1/maxX: ", Float.toString(x1));
-
-        OSCMessage msgY5 = new OSCMessage();
-        msgY5.setAddress("/Y_5");
-        msgY5.addArgument(y5);
-
-        OSCMessage msgX6 = new OSCMessage();
-        msgX6.setAddress("/X_6");
-        msgX6.addArgument(x6);
-
-        // Log.d("x1/maxX: ", Float.toString(x1));
-
-        OSCMessage msgY6 = new OSCMessage();
-        msgY6.setAddress("/Y_6");
-        msgY6.addArgument(y6);
-
-        OSCMessage msgX7 = new OSCMessage();
-        msgX7.setAddress("/X_7");
-        msgX7.addArgument(x7);
-
-        // Log.d("x1/maxX: ", Float.toString(x1));
-
-        OSCMessage msgY7 = new OSCMessage();
-        msgY7.setAddress("/Y_7");
-        msgY7.addArgument(y7);
-
-        OSCMessage msgX8 = new OSCMessage();
-        msgX8.setAddress("/X_8");
-        msgX8.addArgument(x8);
-
-        // Log.d("x1/maxX: ", Float.toString(x1));
-
-        OSCMessage msgY8 = new OSCMessage();
-        msgY8.setAddress("/Y_8");
-        msgY8.addArgument(y8);
-*/
-
-
             sender1.send(msgX1);
             sender1.send(msgY1);
             ///  sender1 = null;
 
-/*
-            sender2.send(msgX2);
-            sender2.send(msgY2);
 
-            sender3.send(msgX3);
-            sender3.send(msgY3);
+                switch (radioTrack) {
 
-            sender4.send(msgX4);
-            sender4.send(msgY4);
 
-            sender5.send(msgX5);
-            sender5.send(msgY5);
+                    case 2: {
 
-            sender6.send(msgX6);
-            sender6.send(msgY6);
 
-            sender7.send(msgX7);
-            sender7.send(msgY7);
+                        OSCMessage msgX4 = new OSCMessage();
+                        msgX4.setAddress("/X_4");
+                        msgX4.addArgument(x4);
 
-            sender8.send(msgX8);
-            sender8.send(msgY8);
-*/
+                        // Log.d("x1/maxX: ", Float.toString(x1));
+
+                        OSCMessage msgY4 = new OSCMessage();
+                        msgY4.setAddress("/Y_4");
+                        msgY4.addArgument(y4);
+
+                        sender4.send(msgX4);
+                        sender4.send(msgY4);
+
+
+                        break;
+                    }
+
+                    case 3: {
+
+
+                        OSCMessage msgX3 = new OSCMessage();
+                        msgX3.setAddress("/X_3");
+                        msgX3.addArgument(x3);
+
+                        // Log.d("x1/maxX: ", Float.toString(x1));
+
+                        OSCMessage msgY3 = new OSCMessage();
+                        msgY3.setAddress("/Y_3");
+                        msgY3.addArgument(y3);
+
+                        sender3.send(msgX3);
+                        sender3.send(msgY3);
+
+                        OSCMessage msgX7 = new OSCMessage();
+                        msgX7.setAddress("/X_7");
+                        msgX7.addArgument(x7);
+
+                        // Log.d("x1/maxX: ", Float.toString(x1));
+
+                        OSCMessage msgY7 = new OSCMessage();
+                        msgY7.setAddress("/Y_7");
+                        msgY7.addArgument(y7);
+
+
+                        sender7.send(msgX7);
+                        sender7.send(msgY7);
+                        break;
+                    }
+
+
+                    case 4: {
+
+                        OSCMessage msgX6 = new OSCMessage();
+                        msgX6.setAddress("/X_6");
+                        msgX6.addArgument(x6);
+
+                        // Log.d("x1/maxX: ", Float.toString(x1));
+
+                        OSCMessage msgY6 = new OSCMessage();
+                        msgY6.setAddress("/Y_6");
+                        msgY6.addArgument(y6);
+
+
+                        sender6.send(msgX6);
+                        sender6.send(msgY6);
+
+
+                        break;
+                    }
+
+
+
+                    case 5: {
+
+                        OSCMessage msgX2 = new OSCMessage();
+                        msgX2.setAddress("/X_2");
+                        msgX2.addArgument(x2);
+
+                        // Log.d("x1/maxX: ", Float.toString(x1));
+
+                        OSCMessage msgY2 = new OSCMessage();
+                        msgY2.setAddress("/Y_2");
+                        msgY2.addArgument(y2);
+
+                        sender2.send(msgX2);
+                        sender2.send(msgY2);
+
+                        break;
+                    }
+                    case 6:{
+
+                        OSCMessage msgX3 = new OSCMessage();
+                        msgX3.setAddress("/X_3");
+                        msgX3.addArgument(x3);
+
+                        // Log.d("x1/maxX: ", Float.toString(x1));
+
+                        OSCMessage msgY3 = new OSCMessage();
+                        msgY3.setAddress("/Y_3");
+                        msgY3.addArgument(y3);
+
+                        sender3.send(msgX3);
+                        sender3.send(msgY3);
+
+                        OSCMessage msgX5 = new OSCMessage();
+                        msgX5.setAddress("/X_5");
+                        msgX5.addArgument(x5);
+
+                        // Log.d("x1/maxX: ", Float.toString(x1));
+
+                        OSCMessage msgY5 = new OSCMessage();
+                        msgY5.setAddress("/Y_5");
+                        msgY5.addArgument(y5);
+
+                        sender5.send(msgX5);
+                        sender5.send(msgY5);
+
+
+                        OSCMessage msgX7 = new OSCMessage();
+                        msgX7.setAddress("/X_7");
+                        msgX7.addArgument(x7);
+
+                        // Log.d("x1/maxX: ", Float.toString(x1));
+
+                        OSCMessage msgY7 = new OSCMessage();
+                        msgY7.setAddress("/Y_7");
+                        msgY7.addArgument(y7);
+
+
+                        sender7.send(msgX7);
+                        sender7.send(msgY7);
+
+                        break;
+                    }
+                    case 7:{
+
+                        OSCMessage msgX2 = new OSCMessage();
+                        msgX2.setAddress("/X_2");
+                        msgX2.addArgument(x2);
+
+                        // Log.d("x1/maxX: ", Float.toString(x1));
+
+                        OSCMessage msgY2 = new OSCMessage();
+                        msgY2.setAddress("/Y_2");
+                        msgY2.addArgument(y2);
+
+                        sender2.send(msgX2);
+                        sender2.send(msgY2);
+
+                        OSCMessage msgX3 = new OSCMessage();
+                        msgX3.setAddress("/X_3");
+                        msgX3.addArgument(x3);
+
+                        // Log.d("x1/maxX: ", Float.toString(x1));
+
+                        OSCMessage msgY3 = new OSCMessage();
+                        msgY3.setAddress("/Y_3");
+                        msgY3.addArgument(y3);
+
+                        sender3.send(msgX3);
+                        sender3.send(msgY3);
+
+                        OSCMessage msgX4 = new OSCMessage();
+                        msgX4.setAddress("/X_4");
+                        msgX4.addArgument(x4);
+
+                        // Log.d("x1/maxX: ", Float.toString(x1));
+
+                        OSCMessage msgY4 = new OSCMessage();
+                        msgY4.setAddress("/Y_4");
+                        msgY4.addArgument(y4);
+
+                        sender4.send(msgX4);
+                        sender4.send(msgY4);
+
+
+
+                        OSCMessage msgX5 = new OSCMessage();
+                        msgX5.setAddress("/X_5");
+                        msgX5.addArgument(x5);
+
+                        // Log.d("x1/maxX: ", Float.toString(x1));
+
+                        OSCMessage msgY5 = new OSCMessage();
+                        msgY5.setAddress("/Y_5");
+                        msgY5.addArgument(y5);
+
+                        sender5.send(msgX5);
+                        sender5.send(msgY5);
+
+
+                        OSCMessage msgX6 = new OSCMessage();
+                        msgX6.setAddress("/X_6");
+                        msgX6.addArgument(x6);
+
+                        // Log.d("x1/maxX: ", Float.toString(x1));
+
+                        OSCMessage msgY6 = new OSCMessage();
+                        msgY6.setAddress("/Y_6");
+                        msgY6.addArgument(y6);
+
+
+                        sender6.send(msgX6);
+                        sender6.send(msgY6);
+
+                        OSCMessage msgX7 = new OSCMessage();
+                        msgX7.setAddress("/X_7");
+                        msgX7.addArgument(x7);
+
+                        // Log.d("x1/maxX: ", Float.toString(x1));
+
+                        OSCMessage msgY7 = new OSCMessage();
+                        msgY7.setAddress("/Y_7");
+                        msgY7.addArgument(y7);
+
+
+                        sender7.send(msgX7);
+                        sender7.send(msgY7);
+
+                        OSCMessage msgX8 = new OSCMessage();
+                        msgX8.setAddress("/X_8");
+                        msgX8.addArgument(x8);
+
+                        // Log.d("x1/maxX: ", Float.toString(x1));
+
+                        OSCMessage msgY8 = new OSCMessage();
+                        msgY8.setAddress("/Y_8");
+                        msgY8.addArgument(y8);
+
+                        sender8.send(msgX8);
+                        sender8.send(msgY8);
+
+                        break;
+                    }
+                    default: {
+
+
+                        break;
+
+
+                    }
+                }
+            }
 
         } catch (Exception e) {
 
