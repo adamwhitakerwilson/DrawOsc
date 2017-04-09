@@ -61,8 +61,8 @@ public class MainActivity extends AppCompatActivity {
                 valid = false;
                 targetIPStr = ipTx.getText().toString();
                 portNumber = Integer.valueOf(portTx.getText().toString());
-                setPort(portNumber);
-                setIp(targetIPStr);
+               // setPort(portNumber);
+                //setIp(targetIPStr);
                 Log.d("IP str :  ", targetIPStr);
                 Log.d("Port:    ", Integer.toString(portNumber));
 
@@ -93,7 +93,7 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onClick(View v){
-                Intent intent = new Intent(v.getContext(), DrawActivity2.class);
+                Intent intent = new Intent(MainActivity.this, DrawActivity2.class);
                 intent.putExtra("port", portNumber);
                 intent.putExtra("ip", targetIPStr);
                 startActivity(intent);
@@ -101,7 +101,7 @@ public class MainActivity extends AppCompatActivity {
 
                 if (valid) {
                     //open draw activity
-                    sender.close();
+                   // sender.close();
                     startActivity(intent);
                 }
                 else if (!valid){

@@ -11,6 +11,7 @@ import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
@@ -30,17 +31,28 @@ public class DrawActivity2 extends Activity{
     RadioButton backward;
     RadioButton backwardForward;
     ToggleButton pause;
+    ToggleButton relationToggle;
     SeekBar speedBar;
 
-    private InetAddress targetIP;
-    private InetAddress targetIP2;
-    String targetIpStr;
-    int portNumber;
     int check;
     float spd;
 
+    String ip;
+    int port;
+
+    boolean relationTrigger;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Bundle extras = getIntent().getExtras();
+        if (extras != null) {
+            ip = extras.getString("ip");
+            port = extras.getInt("port");
+            Log.d("ip: ", ip);
+            Log.d("port: ", Integer.toString(port));
+            setPort(port);
+            setIp(ip);
+        }
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_draw2);
 
@@ -50,19 +62,20 @@ public class DrawActivity2 extends Activity{
         backwardForward.setChecked(true);
         pause = (ToggleButton)findViewById(R.id.pauseButton);
         speedBar = (SeekBar)findViewById(R.id.speed);
-
-        Bundle extras = getIntent().getExtras();
-        if (extras != null) {
-            targetIpStr = extras.getString("ip");
-            portNumber = extras.getInt("port");
-        }
-        setPort(portNumber);
-        setIp(targetIpStr);
-
+        relationToggle = (ToggleButton)findViewById(R.id.relationTogg);
 
         dv = (DrawingView) findViewById(R.id.signature_canvas);
 
+        pause.setOnCheckedChangeListener( new CompoundButton.OnCheckedChangeListener()
+        {
+            @Override
+            public void onCheckedChanged(CompoundButton toggleButton, boolean isChecked)
+            {
+                Log.d("tog:", Boolean.toString(isChecked));
+                setRelationTrigger(isChecked);
 
+            }
+        });
         speedBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener(){
 
             @Override
@@ -117,40 +130,40 @@ public class DrawActivity2 extends Activity{
 
     }
     public void setPort(int portNumber){
-        this.portNumber = portNumber;
+        this.port = portNumber;
     }
     public int getPort(){
-        return portNumber;
+        return port;
     }
     public void setIp(String targetIpStr){
-        this.targetIpStr = targetIpStr;
+        this.ip = targetIpStr;
     }
     public String getIp(){
-        return targetIpStr;
+        return ip;
     }
     private float normalizeX(float n) {
-
+    // seek max = 100
         n = n / (100 >> 1) - 1;
-//Log.d("seek: ", Float.toString(n));
         return n;
     }
-
     public void setSender(int check){
         this.check= check;
     }
-
     public int getSender(){
         return check;
     }
-
     public void setSpeed(float spd){
         this.spd = spd;
     }
-
     public float getSpeed(){
         return spd;
     }
-
+    public  void setRelationTrigger(boolean trigger){
+        this.relationTrigger = trigger;
+    }
+    public  boolean getRelationTrigger(){
+        return relationTrigger;
+    }
     public void clearCanvas(View v) {
 
         dv.clearDrawing();

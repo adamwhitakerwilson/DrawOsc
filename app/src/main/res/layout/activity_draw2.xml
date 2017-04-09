@@ -71,7 +71,7 @@
             app:layout_constraintVertical_bias="0.216" />
 
         <ToggleButton
-            android:id="@+id/presentButton"
+            android:id="@+id/relationTogg"
             android:layout_width="60dp"
             android:layout_height="wrap_content"
             android:layout_marginLeft="8dp"

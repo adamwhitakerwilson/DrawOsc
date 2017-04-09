@@ -54,8 +54,8 @@ public class DrawingView extends View {
     private OSCPortOut sender8 = null;
     private OSCPortIn  receiver;
     private InetAddress targetIP;
-    private String targetIPStr;
-    private int portNumber;
+
+
 
     //points
     private float x1;
@@ -101,6 +101,8 @@ public class DrawingView extends View {
 
     int radio;
     float speed;
+
+    boolean relation;
 
     //paints
     private Paint mPaint;
@@ -149,11 +151,9 @@ public class DrawingView extends View {
         mPaint.setStrokeCap(Paint.Cap.ROUND);
         mPaint.setStrokeWidth(2);
 
-      //  portNumber = ((DrawActivity2) getContext()).getPort();
-        targetIPStr = ((DrawActivity2) getContext()).getIp();
-      //  Log.d("port: ", Integer.toString(portNumber));
-//        Log.d("IP: ", targetIPStr);
-        portNumber = 8800;
+
+
+
         setConnection();
 
         isInEditMode();
@@ -385,7 +385,8 @@ public class DrawingView extends View {
 
         radio = ((DrawActivity2) getContext()).getSender();
         speed = ((DrawActivity2) getContext()).getSpeed();
-       // Log.d("speed", Float.toString(speed));
+      //  Log.d("speed", Float.toString(speed));
+        //Log.d("loopPort: ", Integer.toString(portNumber));
        // Log.d("sender", Integer.toString(radio));
 
         try {
@@ -566,7 +567,6 @@ public class DrawingView extends View {
 
                     if (radio == 1) {
 
-
                         long now1 = System.nanoTime() / 1000000;
                         while (i < pathSize) {
                             if (!up) {
@@ -611,8 +611,13 @@ public class DrawingView extends View {
     //set OSC UDP Port Connection
 
     private void setConnection() {
+        int portNumber = ((DrawActivity2) getContext()).getPort();
+        String targetIPStr = ((DrawActivity2) getContext()).getIp();
+        Log.d("View port: ", Integer.toString(portNumber));
+        Log.d("View IP: ", ""+targetIPStr);
+        //portNumber = 8800;
         try {
-            targetIP = InetAddress.getByName("192.168.0.104");
+            targetIP = InetAddress.getByName(targetIPStr);
             //targetIP = InetAddress.getLocalHost();
 
         } catch (UnknownHostException e) {
@@ -635,7 +640,6 @@ public class DrawingView extends View {
             // toast(getString(R.string.notConnecting));
         }
 
-
     }
 
 
@@ -656,9 +660,15 @@ public class DrawingView extends View {
             msgY1.setAddress("/Y_1");
             msgY1.addArgument(y1);
 
+            sender1.send(msgX1);
+            sender1.send(msgY1);
+            ///  sender1 = null;
 
 
-  /*      OSCMessage msgX2 = new OSCMessage();
+if(((DrawActivity2) getContext()).getRelationTrigger()) {
+
+
+        OSCMessage msgX2 = new OSCMessage();
         msgX2.setAddress("/X_2");
         msgX2.addArgument(x2);
 
@@ -728,14 +738,8 @@ public class DrawingView extends View {
         OSCMessage msgY8 = new OSCMessage();
         msgY8.setAddress("/Y_8");
         msgY8.addArgument(y8);
-*/
 
 
-            sender1.send(msgX1);
-            sender1.send(msgY1);
-            ///  sender1 = null;
-
-/*
             sender2.send(msgX2);
             sender2.send(msgY2);
 
@@ -756,8 +760,8 @@ public class DrawingView extends View {
 
             sender8.send(msgX8);
             sender8.send(msgY8);
-*/
 
+}
         } catch (Exception e) {
 
         }
