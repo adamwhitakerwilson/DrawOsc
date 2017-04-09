@@ -20,7 +20,10 @@ import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.Toast;
 
+import com.illposed.osc.OSCListener;
 import com.illposed.osc.OSCMessage;
+import com.illposed.osc.OSCPort;
+import com.illposed.osc.OSCPortIn;
 import com.illposed.osc.OSCPortOut;
 
 import java.net.InetAddress;
@@ -49,7 +52,7 @@ public class DrawingView extends View {
     private OSCPortOut sender6 = null;
     private OSCPortOut sender7 = null;
     private OSCPortOut sender8 = null;
-    //private OSCPortIn  receiver;
+    private OSCPortIn  receiver;
     private InetAddress targetIP;
     private String targetIPStr;
     private int portNumber;
@@ -93,8 +96,11 @@ public class DrawingView extends View {
     //triggers
     private boolean to = false;
     private boolean clearOn = false;
-    private  boolean up = true;
+    private boolean up = true;
     private int radioId = 0;
+
+    int radio;
+    float speed;
 
     //paints
     private Paint mPaint;
@@ -117,6 +123,8 @@ public class DrawingView extends View {
     RadioButton backward;
     RadioButton backwardForward;
     RadioGroup radioGroup;
+
+
 
     public DrawingView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -141,10 +149,17 @@ public class DrawingView extends View {
         mPaint.setStrokeCap(Paint.Cap.ROUND);
         mPaint.setStrokeWidth(2);
 
+      //  portNumber = ((DrawActivity2) getContext()).getPort();
+        targetIPStr = ((DrawActivity2) getContext()).getIp();
+      //  Log.d("port: ", Integer.toString(portNumber));
+//        Log.d("IP: ", targetIPStr);
         portNumber = 8800;
         setConnection();
 
         isInEditMode();
+
+
+
 
     }
 
@@ -181,9 +196,9 @@ public class DrawingView extends View {
 
         final float a, b;
 
-        a = maxX/2;
+        a = maxX / 2;
 
-        b = maxY/2;
+        b = maxY / 2;
 
         mBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
 
@@ -196,10 +211,10 @@ public class DrawingView extends View {
         paint.setColor(Color.GRAY);
         paint.setStyle(Paint.Style.STROKE);
 
-        mCanvas.drawLine(a, b-(b/2), a, b+(b/2), paint);
-        mCanvas.drawLine((a/2)+(a/4), b,(maxX*0.75f)-(a/4), b, paint);
+        mCanvas.drawLine(a, b - (b / 2), a, b + (b / 2), paint);
+        mCanvas.drawLine((a / 2) + (a / 4), b, (maxX * 0.75f) - (a / 4), b, paint);
         mCanvas.drawCircle(a, b, 200F, paint);
-      //  mCanvas.drawRect(maxX/6, maxY/6, maxX-(maxX/6), maxY-(maxY/6), paint);
+        //  mCanvas.drawRect(maxX/6, maxY/6, maxX-(maxX/6), maxY-(maxY/6), paint);
     }
 
     @Override
@@ -214,6 +229,7 @@ public class DrawingView extends View {
     private float mX, mY;
     private static final float TOUCH_TOLERANCE = 4;
     long timeDifferenceMove;
+
     private void touch_start(float x, float y) {
 
         x1 = x;
@@ -273,7 +289,7 @@ public class DrawingView extends View {
             xHold.add(x);
             yHold.add(y);
 
-           // Log.d("x: ", Float.toString(timeDifferenceMove));
+            // Log.d("x: ", Float.toString(timeDifferenceMove));
 
             // Start the thread that sends messages
 
@@ -315,9 +331,6 @@ public class DrawingView extends View {
     }
 
 
-
-
-
     @Override
     public boolean onTouchEvent(MotionEvent event) {
 
@@ -355,6 +368,8 @@ public class DrawingView extends View {
 
     }
 
+
+
     public void clearDrawing() {
         //clear canvas
         setDrawingCacheEnabled(false);
@@ -367,12 +382,18 @@ public class DrawingView extends View {
 
     public void printDataFile() {
         System.gc();
+
+        radio = ((DrawActivity2) getContext()).getSender();
+        speed = ((DrawActivity2) getContext()).getSpeed();
+       // Log.d("speed", Float.toString(speed));
+       // Log.d("sender", Integer.toString(radio));
+
         try {
             Thread.sleep(16);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        if(up) {
+        if (up) {
 
             new Thread(new Runnable() {
 
@@ -380,10 +401,11 @@ public class DrawingView extends View {
                 int i2 = 0;
                 long now2 = 0;
 
+
                 @Override
                 public void run() {
                     int pathSize = xHold.size();
-                    i2 = pathSize-1;
+                    i2 = pathSize - 1;
                     //    Log.d("size: ", Long.toString(pathSize));
 /*
                     int delay = 16;   // delay for 5 sec.
@@ -421,168 +443,166 @@ public class DrawingView extends View {
 */
 
 //backward forward
-if(1==1) {
+                    if (radio == 0) {
 
-    long now1 = System.nanoTime() / 1000000;
+                        long now1 = System.nanoTime() / 1000000;
 
-    while (i2 > -1) {
+                        while (i2 > -1) {
 
-        if (!up) {
-            i2 = pathSize - 1;
-            break;
-        }
-        float tmh;
+                            if (!up) {
+                                i2 = pathSize - 1;
+                                break;
+                            }
+                            float tmh;
 
-        if(i2 == 0){
-            tmh = timeDifferenceTotal;
-        }
-        else{
-            tmh = timeDifferenceTotal - timeHold.get(i2-1);
-        }
+                            if (i2 == 0) {
+                                tmh = timeDifferenceTotal;
+                            } else {
+                                tmh = timeDifferenceTotal - timeHold.get(i2 - 1);
+                            }
 
-        now2 = System.nanoTime() / 1000000;
-        long nd = now2 - now1;
+                            now2 = System.nanoTime() / 1000000;
+                            long nd = now2 - now1;
 
-        if (nd == tmh) {
-            x1 = xHold.get(i2);
-            y1 = yHold.get(i2);
+                            if (nd == tmh) {
+                                x1 = xHold.get(i2);
+                                y1 = yHold.get(i2);
 
-            x1 = normalizeX(x1);
-            y1 = normalizeY(y1);
+                                x1 = normalizeX(x1);
+                                y1 = normalizeY(y1);
 
-            adamsMath();
-            sendMyOscMessage();
+                                adamsMath();
+                                sendMyOscMessage();
 
-            //  Log.d("osc: ", "sent");
-            i2--;
-        }
-    }
-    i = 0;
-    now1 = System.nanoTime() / 1000000;
+                                //  Log.d("osc: ", "sent");
+                                i2--;
+                            }
+                        }
+                        i = 0;
+                        now1 = System.nanoTime() / 1000000;
 
-        while (i < pathSize) {
-            if (!up) {
-                i = 0;
-                break;
-            }
-            now2 = System.nanoTime() / 1000000;
-            long nd = now2 - now1;
-            float tmh = timeHold.get(i);
+                        while (i < pathSize) {
+                            if (!up) {
+                                i = 0;
+                                break;
+                            }
+                            now2 = System.nanoTime() / 1000000;
+                            long nd = now2 - now1;
+                            float tmh = timeHold.get(i);
 
-            if (nd == tmh) {
-                x1 = xHold.get(i);
-                y1 = yHold.get(i);
+                            if (nd == tmh) {
+                                x1 = xHold.get(i);
+                                y1 = yHold.get(i);
 
-                x1 = normalizeX(x1);
-                y1 = normalizeY(y1);
+                                x1 = normalizeX(x1);
+                                y1 = normalizeY(y1);
 
-                adamsMath();
-                sendMyOscMessage();
-                //  Log.d("osc: ", "sent");
-                i++;
-            }
-        }
-       i2 = pathSize-1;
-        if (up) {
-            try {
+                                adamsMath();
+                                sendMyOscMessage();
+                                //  Log.d("osc: ", "sent");
+                                i++;
+                            }
+                        }
+                        i2 = pathSize - 1;
+                        if (up) {
+                            try {
 
-                printDataFile();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-}
+                                printDataFile();
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }
 
 //backward loop
 
-if(1==0) {
+                    if (radio == 2) {
 
-    long now1 = System.nanoTime() / 1000000;
-    while (i2 > -1) {
+                        long now1 = System.nanoTime() / 1000000;
+                        while (i2 > -1) {
 
-        if (!up) {
-            i2 = pathSize - 1;
-            break;
-        }
+                            if (!up) {
+                                i2 = pathSize - 1;
+                                break;
+                            }
 
-        float tmh;
+                            float tmh;
 
-        if(i2 == 0){
-            tmh = timeDifferenceTotal;
-        }
-        else{
-            tmh = timeDifferenceTotal - timeHold.get(i2-1);
-        }
+                            if (i2 == 0) {
+                                tmh = timeDifferenceTotal;
+                            } else {
+                                tmh = timeDifferenceTotal - timeHold.get(i2 - 1);
+                            }
 
-        now2 = System.nanoTime() / 1000000;
-        long nd = now2 - now1;
+                            now2 = System.nanoTime() / 1000000;
+                            long nd = now2 - now1;
 
-        if (nd == tmh) {
+                            if (nd == tmh) {
 
-            x1 = xHold.get(i2);
-            y1 = yHold.get(i2);
+                                x1 = xHold.get(i2);
+                                y1 = yHold.get(i2);
 
-            x1 = normalizeX(x1);
-            y1 = normalizeY(y1);
+                                x1 = normalizeX(x1);
+                                y1 = normalizeY(y1);
 
-            adamsMath();
-            sendMyOscMessage();
-            //  Log.d("osc: ", "sent");
-            i2--;
-        }
-    }
-    i2 = pathSize-1;
-    if (up) {
-        try {
-            Thread.sleep(16);
-            printDataFile();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-}
+                                adamsMath();
+                                sendMyOscMessage();
+                                //  Log.d("osc: ", "sent");
+                                i2--;
+                            }
+                        }
+                        i2 = pathSize - 1;
+                        if (up) {
+                            try {
+                                Thread.sleep(16);
+                                printDataFile();
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }
 
 //forward loop
 
-if(1==0) {
+                    if (radio == 1) {
 
 
-    long now1 = System.nanoTime() / 1000000;
-    while (i < pathSize) {
-        if (!up) {
-            i = 0;
+                        long now1 = System.nanoTime() / 1000000;
+                        while (i < pathSize) {
+                            if (!up) {
+                                i = 0;
 
-            break;
-        }
+                                break;
+                            }
 
-        now2 = System.nanoTime() / 1000000;
-        long nd = now2 - now1;
-        float tmh = timeHold.get(i);
+                            now2 = System.nanoTime() / 1000000;
+                            long nd = now2 - now1;
+                            float tmh = timeHold.get(i);
 
-        if (nd == tmh) {
-            x1 = xHold.get(i);
-            y1 = yHold.get(i);
+                            if (nd == tmh) {
+                                x1 = xHold.get(i);
+                                y1 = yHold.get(i);
 
-            x1 = normalizeX(x1);
-            y1 = normalizeY(y1);
+                                x1 = normalizeX(x1);
+                                y1 = normalizeY(y1);
 
-            adamsMath();
-            sendMyOscMessage();
-            //  Log.d("osc: ", "sent");
-            i++;
-        }
-    }
-    i = 0;
-    if (up) {
-        try {
-            Thread.sleep(16);
-            printDataFile();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
+                                adamsMath();
+                                sendMyOscMessage();
+                                //  Log.d("osc: ", "sent");
+                                i++;
+                            }
+                        }
+                        i = 0;
+                        if (up) {
+                            try {
+                                Thread.sleep(16);
+                                printDataFile();
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        }
 
-}
+                    }
                 }
             }).start();
         }
@@ -638,7 +658,7 @@ if(1==0) {
 
 
 
-    /*    OSCMessage msgX2 = new OSCMessage();
+  /*      OSCMessage msgX2 = new OSCMessage();
         msgX2.setAddress("/X_2");
         msgX2.addArgument(x2);
 
@@ -708,17 +728,15 @@ if(1==0) {
         OSCMessage msgY8 = new OSCMessage();
         msgY8.setAddress("/Y_8");
         msgY8.addArgument(y8);
-
 */
 
 
+            sender1.send(msgX1);
+            sender1.send(msgY1);
+            ///  sender1 = null;
 
-                sender1.send(msgX1);
-                sender1.send(msgY1);
-          ///  sender1 = null;
-
-
-      /*      sender2.send(msgX2);
+/*
+            sender2.send(msgX2);
             sender2.send(msgY2);
 
             sender3.send(msgX3);
@@ -737,12 +755,12 @@ if(1==0) {
             sender7.send(msgY7);
 
             sender8.send(msgX8);
-            sender8.send(msgY8);*/
+            sender8.send(msgY8);
+*/
 
+        } catch (Exception e) {
 
-            } catch (Exception e) {
-
-            }
+        }
 
     }
 
@@ -770,7 +788,7 @@ if(1==0) {
         y2 = (x1 * (SNeg315) + (y1 * (CNeg315)));
 
         x3 = y1;
-        y3 = x1 * (-1);
+        y3 = x1 * (-1.0F);
 
         x4 = (x1 * (C180)) - (y1 * (S180));
         y4 = (x1 * (S180) + (y1 * (C180)));
@@ -778,14 +796,16 @@ if(1==0) {
         x5 = (x1 * (CNeg135)) - (y1 * (SNeg135));
         y5 = (x1 * (SNeg135) + (y1 * (CNeg135)));
 
-        x6 = x2 * (-1);
-        y6 = y2 * (-1);
+        x6 = x2 * (-1.0F);
+        y6 = y2 * (-1.0F);
 
-        x7 = y1 * (-1);
+        x7 = y1 * (-1.0F);
         y7 = x1;
 
         x8 = (x1 * (C315)) - (y1 * (S315));
         y8 = (x1 * (S315) + (y1 * (C315)));
 
     }
+
+
 }
