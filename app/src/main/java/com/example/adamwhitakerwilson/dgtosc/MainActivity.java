@@ -34,6 +34,8 @@ public class MainActivity extends AppCompatActivity {
 
     private boolean valid = false;
 
+    String targetIpStr;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -41,8 +43,7 @@ public class MainActivity extends AppCompatActivity {
 
         Button butNext = (Button) findViewById(R.id.buttonNext);
         Button butConnect = (Button) findViewById(R.id.connect);
-        butRadio1 = (RadioButton) findViewById(R.id.radioButton);
-        butRadio2 = (RadioButton) findViewById(R.id.radioButton2);
+
         ipTx = (EditText) findViewById(R.id.editTextIpAddress);
         portTx = (EditText) findViewById(R.id.editTextPort);
 
@@ -60,6 +61,8 @@ public class MainActivity extends AppCompatActivity {
                 valid = false;
                 targetIPStr = ipTx.getText().toString();
                 portNumber = Integer.valueOf(portTx.getText().toString());
+                setPort(portNumber);
+                setIp(targetIPStr);
                 Log.d("IP str :  ", targetIPStr);
                 Log.d("Port:    ", Integer.toString(portNumber));
 
@@ -91,19 +94,14 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v){
                 Intent intent = new Intent(v.getContext(), DrawActivity2.class);
+                intent.putExtra("port", portNumber);
+                intent.putExtra("ip", targetIPStr);
                 startActivity(intent);
 
-                if(!butRadio1.isChecked() && !butRadio2.isChecked() && valid){
-                    toast(getString(R.string.selectOne));
-                }
-                else if (butRadio1.isChecked() && valid) {
+
+                if (valid) {
                     //open draw activity
-              //      Intent intent = new Intent(v.getContext(), DrawActivity.class);
-                    startActivity(intent);
-                }
-                else if (butRadio2.isChecked() && valid){
-                    //open generate activity
-             //       Intent intent = new Intent(v.getContext(), GenerateActivity.class);
+                    sender.close();
                     startActivity(intent);
                 }
                 else if (!valid){
@@ -120,13 +118,9 @@ public class MainActivity extends AppCompatActivity {
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putString("IP", targetIPStr);
-        outState.putInt("port", portNumber);
+        outState.putString("port", Integer.toString(portNumber));
 
     }
-
-
-
-
 
     //displays a toast message
     private void toast(String msg){
@@ -156,14 +150,6 @@ public class MainActivity extends AppCompatActivity {
            // toast(getString(R.string.notConnecting));
         }
 
-
-
-        /*try {                                     //------set up incoming-------
-            receiver = new OSCPortIn(4444);
-        } catch (SocketException e) {
-            e.printStackTrace();
-        } */
-
     }
     //send OSC messages
 
@@ -192,6 +178,17 @@ public class MainActivity extends AppCompatActivity {
 
 
     }
-
+    public void setPort(int portNumber){
+        this.portNumber = portNumber;
+    }
+    public int getPort(){
+        return portNumber;
+    }
+    public void setIp(String targetIp){
+        this.targetIpStr = targetIp;
+    }
+    public String getIp(){
+        return targetIpStr;
+    }
 
 }

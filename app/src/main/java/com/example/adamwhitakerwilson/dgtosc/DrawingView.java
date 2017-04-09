@@ -1,12 +1,14 @@
 package com.example.adamwhitakerwilson.dgtosc;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Point;
+import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
@@ -18,7 +20,10 @@ import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.Toast;
 
+import com.illposed.osc.OSCListener;
 import com.illposed.osc.OSCMessage;
+import com.illposed.osc.OSCPort;
+import com.illposed.osc.OSCPortIn;
 import com.illposed.osc.OSCPortOut;
 
 import java.net.InetAddress;
@@ -26,6 +31,8 @@ import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  * Created by adamwhitakerwilson on 2017-04-04.
@@ -34,6 +41,7 @@ import java.util.List;
 //Custom View
 
 public class DrawingView extends View {
+
 
     //network variables
     private OSCPortOut sender1 = null;
@@ -44,7 +52,7 @@ public class DrawingView extends View {
     private OSCPortOut sender6 = null;
     private OSCPortOut sender7 = null;
     private OSCPortOut sender8 = null;
-    //private OSCPortIn  receiver;
+    private OSCPortIn  receiver;
     private InetAddress targetIP;
     private String targetIPStr;
     private int portNumber;
@@ -73,6 +81,7 @@ public class DrawingView extends View {
     //time
     private final List<Long> timeHold = new ArrayList<>();
     private long timeStampStart;
+    long timeDifferenceTotal;
 
     //maths
     float CNeg315 = (float) Math.cos(-315);
@@ -87,7 +96,11 @@ public class DrawingView extends View {
     //triggers
     private boolean to = false;
     private boolean clearOn = false;
-    private  boolean up = true;
+    private boolean up = true;
+    private int radioId = 0;
+
+    int radio;
+    float speed;
 
     //paints
     private Paint mPaint;
@@ -109,14 +122,13 @@ public class DrawingView extends View {
     RadioButton forward;
     RadioButton backward;
     RadioButton backwardForward;
+    RadioGroup radioGroup;
+
 
 
     public DrawingView(Context context, AttributeSet attrs) {
         super(context, attrs);
 
-        forward = (RadioButton) findViewById(R.id.forward);
-        backward = (RadioButton) findViewById(R.id.backward);
-        backwardForward = (RadioButton) findViewById(R.id.backwardForward);
 
         mPath = new Path();
         mBitmapPaint = new Paint(Paint.DITHER_FLAG);
@@ -137,10 +149,23 @@ public class DrawingView extends View {
         mPaint.setStrokeCap(Paint.Cap.ROUND);
         mPaint.setStrokeWidth(2);
 
+      //  portNumber = ((DrawActivity2) getContext()).getPort();
+        targetIPStr = ((DrawActivity2) getContext()).getIp();
+      //  Log.d("port: ", Integer.toString(portNumber));
+//        Log.d("IP: ", targetIPStr);
         portNumber = 8800;
         setConnection();
 
         isInEditMode();
+
+
+
+
+    }
+
+    @Override
+    public Object getTag() {
+        return super.getTag();
     }
 
     @Override
@@ -171,9 +196,9 @@ public class DrawingView extends View {
 
         final float a, b;
 
-        a = maxX/2;
+        a = maxX / 2;
 
-        b = maxY/2;
+        b = maxY / 2;
 
         mBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
 
@@ -186,10 +211,10 @@ public class DrawingView extends View {
         paint.setColor(Color.GRAY);
         paint.setStyle(Paint.Style.STROKE);
 
-        mCanvas.drawLine(a, b-(b/2), a, b+(b/2), paint);
-        mCanvas.drawLine((a/2)+(a/4), b,(maxX*0.75f)-(a/4), b, paint);
+        mCanvas.drawLine(a, b - (b / 2), a, b + (b / 2), paint);
+        mCanvas.drawLine((a / 2) + (a / 4), b, (maxX * 0.75f) - (a / 4), b, paint);
         mCanvas.drawCircle(a, b, 200F, paint);
-        mCanvas.drawRect(maxX/6, maxY/6, maxX-(maxX/6), maxY-(maxY/6), paint);
+        //  mCanvas.drawRect(maxX/6, maxY/6, maxX-(maxX/6), maxY-(maxY/6), paint);
     }
 
     @Override
@@ -203,6 +228,7 @@ public class DrawingView extends View {
 
     private float mX, mY;
     private static final float TOUCH_TOLERANCE = 4;
+    long timeDifferenceMove;
 
     private void touch_start(float x, float y) {
 
@@ -219,7 +245,7 @@ public class DrawingView extends View {
         }
 
         to = true;
-        timeStampStart = System.nanoTime() / 1000000;
+
 
         if (xHold.size() != 0) {
             xHold.clear();
@@ -231,6 +257,7 @@ public class DrawingView extends View {
             clearDrawing();
         }
         mPath.reset();
+        timeStampStart = System.nanoTime() / 1000000;
         mPath.moveTo(x, y);
         mX = x;
         mY = y;
@@ -240,6 +267,12 @@ public class DrawingView extends View {
     private void touch_move(float x, float y) {
         float dx = Math.abs(x - mX);
         float dy = Math.abs(y - mY);
+        try {
+            Thread.sleep(16);
+            printDataFile();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         if (dx >= TOUCH_TOLERANCE || dy >= TOUCH_TOLERANCE) {
             mPath.quadTo(mX, mY, (x + mX) / 2, (y + mY) / 2);
             mX = x;
@@ -247,15 +280,16 @@ public class DrawingView extends View {
             x1 = x;
             y1 = y;
             circlePath.reset();
-            circlePath.addCircle(mX, mY, 30, Path.Direction.CW);
+            circlePath.addCircle(mX, mY, 10, Path.Direction.CW);
 
 
             long timeStampMove = System.nanoTime() / 1000000;
-            long timeDifferenceMove = timeStampMove - timeStampStart;
+            timeDifferenceMove = timeStampMove - timeStampStart;
+            timeHold.add(timeDifferenceMove);
             xHold.add(x);
             yHold.add(y);
-            timeHold.add(timeDifferenceMove);
-         //   Log.d("x: ", Float.toString(x));
+
+            // Log.d("x: ", Float.toString(timeDifferenceMove));
 
             // Start the thread that sends messages
 
@@ -286,7 +320,7 @@ public class DrawingView extends View {
         up = true;
 
         long timeStampEnd = System.nanoTime() / 1000000;
-        @SuppressWarnings("UnusedAssignment") long timeDifferenceTotal = timeStampEnd - timeStampStart;
+        timeDifferenceTotal = timeStampEnd - timeStampStart;
         to = false;
         try {
             Thread.sleep(20);
@@ -334,6 +368,8 @@ public class DrawingView extends View {
 
     }
 
+
+
     public void clearDrawing() {
         //clear canvas
         setDrawingCacheEnabled(false);
@@ -345,48 +381,227 @@ public class DrawingView extends View {
     //Looper
 
     public void printDataFile() {
+        System.gc();
 
-        if(up) {
+        radio = ((DrawActivity2) getContext()).getSender();
+        speed = ((DrawActivity2) getContext()).getSpeed();
+       // Log.d("speed", Float.toString(speed));
+       // Log.d("sender", Integer.toString(radio));
+
+        try {
+            Thread.sleep(16);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        if (up) {
 
             new Thread(new Runnable() {
 
                 int i = 0;
-                // int i = xHold.size();
-                // i--;
-                final long now1 = System.nanoTime() / 1000000;
+                int i2 = 0;
                 long now2 = 0;
+
 
                 @Override
                 public void run() {
                     int pathSize = xHold.size();
+                    i2 = pathSize - 1;
                     //    Log.d("size: ", Long.toString(pathSize));
+/*
+                    int delay = 16;   // delay for 5 sec.
+                    final int interval = 16;  // iterate every sec.
+                    Timer timer = new Timer();
 
-                    while (i < pathSize) {
-                        if(!up){
 
-                            break;
-                        }
-                        now2 = System.nanoTime() / 1000000;
 
-                        if (now2 - now1 == timeHold.get(i)) {
-                            x1 = xHold.get(i);
-                            y1 = yHold.get(i);
+                    timer.scheduleAtFixedRate(new TimerTask() {
+                        int i = 0;
+                        public void run() {
+                            if(i == xHold.size()) {
+                                i = 0;
+                            }
+                            if (now2 - now1 == timeHold.get(i)) {
+                                x1 = xHold.get(i);
+                                y1 = yHold.get(i);
 
-                            x1 = normalizeX(x1);
-                            y1 = normalizeY(y1);
+                                x1 = normalizeX(x1);
+                                y1 = normalizeY(y1);
 
-                            adamsMath();
-                            sendMyOscMessage();
+                                adamsMath();
+                                sendMyOscMessage();
+                                Log.d("osc: ", "sent");
+                                i++;
+                            }
 
+                            Log.d("xLoop: ", Float.toString(xHold.get(i)));
+                            Log.d("yLoop: ", Float.toString(yHold.get(i)));
+                        //    Log.d("timeLoop: ", Integer.toString(timeHold.get(i)));
                             i++;
                         }
-                    }
-                    if (up) {
-                        try {
-                            printDataFile();
-                        } catch (Exception e) {
-                            e.printStackTrace();
+                    }, delay, interval);
+
+*/
+
+//backward forward
+                    if (radio == 0) {
+
+                        long now1 = System.nanoTime() / 1000000;
+
+                        while (i2 > -1) {
+
+                            if (!up) {
+                                i2 = pathSize - 1;
+                                break;
+                            }
+                            float tmh;
+
+                            if (i2 == 0) {
+                                tmh = timeDifferenceTotal;
+                            } else {
+                                tmh = timeDifferenceTotal - timeHold.get(i2 - 1);
+                            }
+
+                            now2 = System.nanoTime() / 1000000;
+                            long nd = now2 - now1;
+
+                            if (nd == tmh) {
+                                x1 = xHold.get(i2);
+                                y1 = yHold.get(i2);
+
+                                x1 = normalizeX(x1);
+                                y1 = normalizeY(y1);
+
+                                adamsMath();
+                                sendMyOscMessage();
+
+                                //  Log.d("osc: ", "sent");
+                                i2--;
+                            }
                         }
+                        i = 0;
+                        now1 = System.nanoTime() / 1000000;
+
+                        while (i < pathSize) {
+                            if (!up) {
+                                i = 0;
+                                break;
+                            }
+                            now2 = System.nanoTime() / 1000000;
+                            long nd = now2 - now1;
+                            float tmh = timeHold.get(i);
+
+                            if (nd == tmh) {
+                                x1 = xHold.get(i);
+                                y1 = yHold.get(i);
+
+                                x1 = normalizeX(x1);
+                                y1 = normalizeY(y1);
+
+                                adamsMath();
+                                sendMyOscMessage();
+                                //  Log.d("osc: ", "sent");
+                                i++;
+                            }
+                        }
+                        i2 = pathSize - 1;
+                        if (up) {
+                            try {
+
+                                printDataFile();
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }
+
+//backward loop
+
+                    if (radio == 2) {
+
+                        long now1 = System.nanoTime() / 1000000;
+                        while (i2 > -1) {
+
+                            if (!up) {
+                                i2 = pathSize - 1;
+                                break;
+                            }
+
+                            float tmh;
+
+                            if (i2 == 0) {
+                                tmh = timeDifferenceTotal;
+                            } else {
+                                tmh = timeDifferenceTotal - timeHold.get(i2 - 1);
+                            }
+
+                            now2 = System.nanoTime() / 1000000;
+                            long nd = now2 - now1;
+
+                            if (nd == tmh) {
+
+                                x1 = xHold.get(i2);
+                                y1 = yHold.get(i2);
+
+                                x1 = normalizeX(x1);
+                                y1 = normalizeY(y1);
+
+                                adamsMath();
+                                sendMyOscMessage();
+                                //  Log.d("osc: ", "sent");
+                                i2--;
+                            }
+                        }
+                        i2 = pathSize - 1;
+                        if (up) {
+                            try {
+                                Thread.sleep(16);
+                                printDataFile();
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }
+
+//forward loop
+
+                    if (radio == 1) {
+
+
+                        long now1 = System.nanoTime() / 1000000;
+                        while (i < pathSize) {
+                            if (!up) {
+                                i = 0;
+
+                                break;
+                            }
+
+                            now2 = System.nanoTime() / 1000000;
+                            long nd = now2 - now1;
+                            float tmh = timeHold.get(i);
+
+                            if (nd == tmh) {
+                                x1 = xHold.get(i);
+                                y1 = yHold.get(i);
+
+                                x1 = normalizeX(x1);
+                                y1 = normalizeY(y1);
+
+                                adamsMath();
+                                sendMyOscMessage();
+                                //  Log.d("osc: ", "sent");
+                                i++;
+                            }
+                        }
+                        i = 0;
+                        if (up) {
+                            try {
+                                Thread.sleep(16);
+                                printDataFile();
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        }
+
                     }
                 }
             }).start();
@@ -414,10 +629,12 @@ public class DrawingView extends View {
             sender6 = new OSCPortOut(targetIP, portNumber + 5);
             sender7 = new OSCPortOut(targetIP, portNumber + 6);
             sender8 = new OSCPortOut(targetIP, portNumber + 7);//------set up outgoing ------
+
         } catch (SocketException e) {
             e.printStackTrace();
             // toast(getString(R.string.notConnecting));
         }
+
 
     }
 
@@ -426,17 +643,22 @@ public class DrawingView extends View {
 
     private void sendMyOscMessage() {
 
-        OSCMessage msgX1 = new OSCMessage();
-        msgX1.setAddress("/X_1");
-        msgX1.addArgument(x1);
+        try {
 
-        // Log.d("x1/maxX: ", Float.toString(x1));
 
-        OSCMessage msgY1 = new OSCMessage();
-        msgY1.setAddress("/Y_1");
-        msgY1.addArgument(y1);
+            OSCMessage msgX1 = new OSCMessage();
+            msgX1.setAddress("/X_1");
+            msgX1.addArgument(x1);
 
-        OSCMessage msgX2 = new OSCMessage();
+            // Log.d("x1/maxX: ", Float.toString(x1));
+
+            OSCMessage msgY1 = new OSCMessage();
+            msgY1.setAddress("/Y_1");
+            msgY1.addArgument(y1);
+
+
+
+  /*      OSCMessage msgX2 = new OSCMessage();
         msgX2.setAddress("/X_2");
         msgX2.addArgument(x2);
 
@@ -506,13 +728,14 @@ public class DrawingView extends View {
         OSCMessage msgY8 = new OSCMessage();
         msgY8.setAddress("/Y_8");
         msgY8.addArgument(y8);
+*/
 
-
-        try {
 
             sender1.send(msgX1);
             sender1.send(msgY1);
+            ///  sender1 = null;
 
+/*
             sender2.send(msgX2);
             sender2.send(msgY2);
 
@@ -533,8 +756,9 @@ public class DrawingView extends View {
 
             sender8.send(msgX8);
             sender8.send(msgY8);
+*/
 
-        } catch (Exception ignored) {
+        } catch (Exception e) {
 
         }
 
@@ -564,7 +788,7 @@ public class DrawingView extends View {
         y2 = (x1 * (SNeg315) + (y1 * (CNeg315)));
 
         x3 = y1;
-        y3 = x1 * (-1);
+        y3 = x1 * (-1.0F);
 
         x4 = (x1 * (C180)) - (y1 * (S180));
         y4 = (x1 * (S180) + (y1 * (C180)));
@@ -572,14 +796,16 @@ public class DrawingView extends View {
         x5 = (x1 * (CNeg135)) - (y1 * (SNeg135));
         y5 = (x1 * (SNeg135) + (y1 * (CNeg135)));
 
-        x6 = x2 * (-1);
-        y6 = y2 * (-1);
+        x6 = x2 * (-1.0F);
+        y6 = y2 * (-1.0F);
 
-        x7 = y1 * (-1);
+        x7 = y1 * (-1.0F);
         y7 = x1;
 
         x8 = (x1 * (C315)) - (y1 * (S315));
         y8 = (x1 * (S315) + (y1 * (C315)));
 
     }
+
+
 }
