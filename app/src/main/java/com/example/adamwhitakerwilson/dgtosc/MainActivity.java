@@ -41,8 +41,7 @@ public class MainActivity extends AppCompatActivity {
 
         Button butNext = (Button) findViewById(R.id.buttonNext);
         Button butConnect = (Button) findViewById(R.id.connect);
-        butRadio1 = (RadioButton) findViewById(R.id.radioButton);
-        butRadio2 = (RadioButton) findViewById(R.id.radioButton2);
+
         ipTx = (EditText) findViewById(R.id.editTextIpAddress);
         portTx = (EditText) findViewById(R.id.editTextPort);
 
@@ -93,16 +92,9 @@ public class MainActivity extends AppCompatActivity {
                 Intent intent = new Intent(v.getContext(), DrawActivity2.class);
                 startActivity(intent);
 
-                if(!butRadio1.isChecked() && !butRadio2.isChecked() && valid){
-                    toast(getString(R.string.selectOne));
-                }
-                else if (butRadio1.isChecked() && valid) {
-                    //open draw activity
-                    startActivity(intent);
-                }
-                else if (butRadio2.isChecked() && valid){
-                    //open generate activity
 
+                if (valid) {
+                    //open draw activity
                     startActivity(intent);
                 }
                 else if (!valid){

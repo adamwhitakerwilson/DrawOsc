@@ -199,7 +199,7 @@ public class DrawingView extends View {
         mCanvas.drawLine(a, b-(b/2), a, b+(b/2), paint);
         mCanvas.drawLine((a/2)+(a/4), b,(maxX*0.75f)-(a/4), b, paint);
         mCanvas.drawCircle(a, b, 200F, paint);
-        mCanvas.drawRect(maxX/6, maxY/6, maxX-(maxX/6), maxY-(maxY/6), paint);
+      //  mCanvas.drawRect(maxX/6, maxY/6, maxX-(maxX/6), maxY-(maxY/6), paint);
     }
 
     @Override
@@ -213,7 +213,7 @@ public class DrawingView extends View {
 
     private float mX, mY;
     private static final float TOUCH_TOLERANCE = 4;
-
+    long timeDifferenceMove;
     private void touch_start(float x, float y) {
 
         x1 = x;
@@ -229,7 +229,7 @@ public class DrawingView extends View {
         }
 
         to = true;
-        timeStampStart = System.nanoTime() / 1000000;
+
 
         if (xHold.size() != 0) {
             xHold.clear();
@@ -241,6 +241,7 @@ public class DrawingView extends View {
             clearDrawing();
         }
         mPath.reset();
+        timeStampStart = System.nanoTime() / 1000000;
         mPath.moveTo(x, y);
         mX = x;
         mY = y;
@@ -263,14 +264,15 @@ public class DrawingView extends View {
             x1 = x;
             y1 = y;
             circlePath.reset();
-            circlePath.addCircle(mX, mY, 30, Path.Direction.CW);
+            circlePath.addCircle(mX, mY, 10, Path.Direction.CW);
 
 
             long timeStampMove = System.nanoTime() / 1000000;
-            long timeDifferenceMove = timeStampMove - timeStampStart;
+            timeDifferenceMove = timeStampMove - timeStampStart;
+            timeHold.add(timeDifferenceMove);
             xHold.add(x);
             yHold.add(y);
-            timeHold.add(timeDifferenceMove);
+
            // Log.d("x: ", Float.toString(timeDifferenceMove));
 
             // Start the thread that sends messages
@@ -365,6 +367,11 @@ public class DrawingView extends View {
 
     public void printDataFile() {
         System.gc();
+        try {
+            Thread.sleep(16);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         if(up) {
 
             new Thread(new Runnable() {
@@ -445,6 +452,7 @@ if(1==1) {
 
             adamsMath();
             sendMyOscMessage();
+
             //  Log.d("osc: ", "sent");
             i2--;
         }
@@ -477,7 +485,7 @@ if(1==1) {
        i2 = pathSize-1;
         if (up) {
             try {
-                Thread.sleep(16);
+
                 printDataFile();
             } catch (Exception e) {
                 e.printStackTrace();
@@ -593,7 +601,7 @@ if(1==0) {
         }
 
         try {
-            //sender1 = new OSCPortOut(targetIP, portNumber);
+            sender1 = new OSCPortOut(targetIP, portNumber);
             sender2 = new OSCPortOut(targetIP, portNumber + 1);
             sender3 = new OSCPortOut(targetIP, portNumber + 2);
             sender4 = new OSCPortOut(targetIP, portNumber + 3);
@@ -616,7 +624,7 @@ if(1==0) {
     private void sendMyOscMessage() {
 
         try {
-            sender1 = new OSCPortOut(targetIP, portNumber);
+
 
             OSCMessage msgX1 = new OSCMessage();
             msgX1.setAddress("/X_1");
@@ -707,7 +715,7 @@ if(1==0) {
 
                 sender1.send(msgX1);
                 sender1.send(msgY1);
-            sender1 = null;
+          ///  sender1 = null;
 
 
       /*      sender2.send(msgX2);

@@ -24,6 +24,7 @@
     <string name="backward">Backward</string>
     <string name="forward">Forward</string>
     <string name="loopType">Loop Type</string>
+    <string name="instructions">Hello, im am a bunch of instructions...... </string>
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment" tools:ignore="UnusedResources">Hello blank fragment</string>
