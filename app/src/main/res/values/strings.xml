@@ -2,8 +2,6 @@
     <string name="app_name">DGTOSC</string>
     <string name="connected">Connection Successful</string>
     <string name="notConnected" tools:ignore="UnusedResources">Not Connected</string>
-    <string name="draw">Draw</string>
-    <string name="generate">Generate</string>
     <string name="ip">IP Address:</string>
     <string name="ipHint" tools:ignore="UnusedResources">127.0.0.1</string>
     <string name="Port">Port:</string>
@@ -15,10 +13,7 @@
     <string name="instruct">Please enter IP Address and Port Number, then press connect.</string>
     <string name="ipInvalid">Invalid IP Address or Port Number</string>
     <string name="clear" tools:ignore="UnusedResources">Clear</string>
-
-    <string name="speed">Speed</string>
     <string name="pause">Pause</string>
-    <string name="present">Present</string>
     <string name="backwardForward">Backward/Forward</string>
     <string name="backward">Backward</string>
     <string name="forward">Forward</string>
