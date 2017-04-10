@@ -19,6 +19,7 @@ import com.illposed.osc.OSCPortOut;
 import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
+import java.util.regex.Pattern;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -31,6 +32,7 @@ public class MainActivity extends AppCompatActivity {
     private int portNumber;
     private OSCPortOut sender = null;
     private boolean valid = false;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,30 +57,28 @@ public class MainActivity extends AppCompatActivity {
                 validDisplay.setText("");
                 valid = false;
                 targetIPStr = ipTx.getText().toString();
-                portNumber = Integer.valueOf(portTx.getText().toString());
-                // setPort(portNumber);
-                //setIp(targetIPStr);
-                Log.d("IP str :  ", targetIPStr);
-                Log.d("Port:    ", Integer.toString(portNumber));
+                if(!portTx.getText().toString().isEmpty()) {
+                    portNumber = Integer.valueOf(portTx.getText().toString());
+                }
+if(ValidateIPV4.isValidIPV4(targetIPStr) && portNumber <= 65535) {
 
-                // Start the thread that sends messages
+    // Start the thread that sends messages
 
+    new Thread(new Runnable() {
+        public void run() {
 
-                new Thread(new Runnable() {
-                    public void run() {
+            setConnection();
+            validDisplay.setText(getString(R.string.connected));
+            valid = true;
+           // toast(getString(R.string.connected));
 
-                        setConnection();
-                        valid = true;
-                        // toast("connected");
-                        //sendMyOscMessage();
+        }
 
-                        //noinspection StatementWithEmptyBody
-                        //                            validDisplay.setText(getString(R.string.connected));
-
-                    }
-
-                }).start();
-
+    }).start();
+}
+else{
+    toast(getString(R.string.ipInvalid));
+}
             }
 
 
@@ -91,12 +91,11 @@ public class MainActivity extends AppCompatActivity {
                 Intent intent = new Intent(MainActivity.this, DrawActivity2.class);
                 intent.putExtra("port", portNumber);
                 intent.putExtra("ip", targetIPStr);
-                startActivity(intent);
+
 
 
                 if (valid) {
                     //open draw activity
-                    // sender.close();
                     startActivity(intent);
                 } else if (!valid) {
                     toast(getString(R.string.instruct));
@@ -107,6 +106,7 @@ public class MainActivity extends AppCompatActivity {
 
         });
     }
+
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
@@ -189,4 +189,16 @@ public class MainActivity extends AppCompatActivity {
         this.targetIpStr = targetIp;
     }
 
+
+}
+class ValidateIPV4
+{
+
+    static private final String IPV4_REGEX = "(([0-1]?[0-9]{1,2}\\.)|(2[0-4][0-9]\\.)|(25[0-5]\\.)){3}(([0-1]?[0-9]{1,2})|(2[0-4][0-9])|(25[0-5]))";
+    static private Pattern IPV4_PATTERN = Pattern.compile(IPV4_REGEX);
+
+    public static boolean isValidIPV4(final String s)
+    {
+        return IPV4_PATTERN.matcher(s).matches();
+    }
 }

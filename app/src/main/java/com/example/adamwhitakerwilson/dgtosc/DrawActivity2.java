@@ -32,8 +32,6 @@ public class DrawActivity2 extends Activity {
     RadioButton backwardForward;
     RadioButton out1, out2, out3, out4, out5, out6, out7;
     ToggleButton pause;
-    ToggleButton relationToggle;
-    SeekBar speedBar;
 
     int check;
     float spd;
@@ -51,8 +49,8 @@ public class DrawActivity2 extends Activity {
         if (extras != null) {
             ip = extras.getString("ip");
             port = extras.getInt("port");
-            Log.d("ip: ", ip);
-            Log.d("port: ", Integer.toString(port));
+            //Log.d("ip: ", ip);
+            //Log.d("port: ", Integer.toString(port));
             setPort(port);
             setIp(ip);
         }
@@ -63,7 +61,6 @@ public class DrawActivity2 extends Activity {
         backward = (RadioButton) findViewById(R.id.backward);
         backwardForward = (RadioButton) findViewById(R.id.backwardForward);
         backwardForward.setChecked(true);
-
 
         pause = (ToggleButton) findViewById(R.id.pauseButton);
 
@@ -76,19 +73,7 @@ public class DrawActivity2 extends Activity {
         out7 = (RadioButton) findViewById(R.id.out7);
 
 
-        relationToggle = (ToggleButton) findViewById(R.id.relationButton);
-
         dv = (DrawingView) findViewById(R.id.signature_canvas);
-
-
-        relationToggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton toggleButton, boolean isChecked) {
-                Log.d("tog:", Boolean.toString(isChecked));
-                setRelationTrigger(isChecked);
-
-            }
-        });
 
         pause.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
