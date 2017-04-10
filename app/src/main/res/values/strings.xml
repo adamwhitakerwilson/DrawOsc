@@ -21,7 +21,7 @@
     <string name="instructions">Notice: When you enter your port number, 3 consecutive ports are opened as well.
     Two messages are sent for each port. Messages are sent as follows. [Port# - \"X_1\", \"Y_1\"] [Port# - \"X_2\", \"Y_2\"] [Port# +1 - \"X_3\", \"Y_3\"]
     [Port# +1 - \"X_4\", \"Y_4\"] [Port# +2 - \"X_5\", \"Y_5\"] [Port# +2 - \"X_6\", \"Y_6\"] [Port# +3 - \"X_7\", \"Y_7\"]
-    [Port# +3 - \"X_8\", \"Y_8\"] |||Trajectory Tracer/Generator Utility||| This app will allow you to draw a path
+    [Port# +3 - \"X_8\", \"Y_8\"] |||DGTOSC - Trajectory Tracer Utility||| This app will allow you to draw a path
     on the screen followed by a constant loop of that path. The 2d pixel (x,y) co-ordinates of the path are scaled
     to cartesian coordinates with a range of [-1.0 to 1.0] and are continuously streaming via OSC(Open Sound Control) network protocol.
     An option to send 7 symmetrical points rotated by 45 degrees clockwise is also available.
