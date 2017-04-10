@@ -1,29 +1,16 @@
 package com.example.adamwhitakerwilson.dgtosc;
 
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
-import android.graphics.Point;
-import android.os.Bundle;
-import android.provider.MediaStore;
-import android.support.annotation.Nullable;
 import android.util.AttributeSet;
-import android.util.Log;
-import android.view.Display;
 import android.view.MotionEvent;
 import android.view.View;
-import android.widget.RadioButton;
-import android.widget.RadioGroup;
-import android.widget.Toast;
 
-import com.illposed.osc.OSCListener;
 import com.illposed.osc.OSCMessage;
-import com.illposed.osc.OSCPort;
-import com.illposed.osc.OSCPortIn;
 import com.illposed.osc.OSCPortOut;
 
 import java.net.InetAddress;
@@ -31,8 +18,6 @@ import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
 
 /**
  * Created by adamwhitakerwilson on 2017-04-04.
@@ -52,31 +37,25 @@ public class DrawingView extends View {
     private final Paint mBitmapPaint;
     private final Paint circlePaint;
     private final Path circlePath;
-    //measurements
-    public int width;
-    public int height;
-    long timeDifferenceTotal;
     //maths
-    float CNeg315 = (float) Math.cos(-315);
-    float SNeg315 = (float) Math.sin(-315);
-    float C180 = (float) Math.cos(180);
-    float S180 = (float) Math.sin(180);
-    float CNeg135 = (float) Math.cos(-135);
-    float SNeg135 = (float) Math.sin(-135);
-    float C315 = (float) Math.cos(315);
-    float S315 = (float) Math.sin(315);
-    int radio;
-    float speed;
-    int radioTrack = 1;
-    boolean relation;
-    int maxX = 500;
-    int maxY = 250;
-    //GUIs
-    RadioButton forward;
-    RadioButton backward;
-    RadioButton backwardForward;
-    RadioGroup radioGroup;
-    long timeDifferenceMove;
+    private final float CNeg315 = (float) Math.cos(-315);
+    private final float SNeg315 = (float) Math.sin(-315);
+    private final float C180 = (float) Math.cos(180);
+    private final float S180 = (float) Math.sin(180);
+    private final float CNeg135 = (float) Math.cos(-135);
+    private final float SNeg135 = (float) Math.sin(-135);
+    private final float C315 = (float) Math.cos(315);
+    private final float S315 = (float) Math.sin(315);
+    //paints
+    private final Paint mPaint;
+    //measurements
+    private int width;
+    private int height;
+    private long timeDifferenceTotal;
+    private int radio;
+    private int radioTrack = 1;
+    private int maxX = 500;
+    private int maxY = 250;
     //network variables
     private OSCPortOut sender1 = null;
     private OSCPortOut sender2 = null;
@@ -109,16 +88,13 @@ public class DrawingView extends View {
     private boolean to = false;
     private boolean clearOn = false;
     private boolean up = true;
-    private int radioId = 0;
-    //paints
-    private Paint mPaint;
+    private long timeDifferenceMove;
     private Bitmap mBitmap;
     private Canvas mCanvas;
     private float mX, mY;
 
     public DrawingView(Context context, AttributeSet attrs) {
         super(context, attrs);
-
 
         mPath = new Path();
         mBitmapPaint = new Paint(Paint.DITHER_FLAG);
@@ -139,17 +115,9 @@ public class DrawingView extends View {
         mPaint.setStrokeCap(Paint.Cap.ROUND);
         mPaint.setStrokeWidth(2);
 
-
         setConnection();
 
         isInEditMode();
-
-
-    }
-
-    @Override
-    public Object getTag() {
-        return super.getTag();
     }
 
     @Override
@@ -163,7 +131,6 @@ public class DrawingView extends View {
 
     @Override
     public boolean isInEditMode() {
-
         return true;
     }
 
@@ -172,33 +139,25 @@ public class DrawingView extends View {
 
         super.onSizeChanged(w, h, oldw, oldh);
 
-        //w = (int) (((double)wM)-((0.1) * ((double)wM)));
-        // h = (int)(((double)hM) - ((0.29) * ((double)hM)));
-
-        width = w;      // don't forget these
+        width = w;
         height = h;
 
         final float a, b;
 
         a = maxX / 2;
-
         b = maxY / 2;
 
         mBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-
         mBitmap.eraseColor(Color.BLACK);
         mCanvas = new Canvas(mBitmap);
-
         Paint paint = new Paint();
         paint.setAntiAlias(true);
         paint.setStrokeWidth(3F);
         paint.setColor(Color.GRAY);
         paint.setStyle(Paint.Style.STROKE);
-
         mCanvas.drawLine(a, b - (b / 2), a, b + (b / 2), paint);
         mCanvas.drawLine((a / 2) + (a / 4), b, (maxX * 0.75f) - (a / 4), b, paint);
         mCanvas.drawCircle(a, b, 200F, paint);
-        //  mCanvas.drawRect(maxX/6, maxY/6, maxX-(maxX/6), maxY-(maxY/6), paint);
     }
 
     @Override
@@ -225,7 +184,6 @@ public class DrawingView extends View {
         }
 
         to = true;
-
 
         if (xHold.size() != 0) {
             xHold.clear();
@@ -262,16 +220,11 @@ public class DrawingView extends View {
             circlePath.reset();
             circlePath.addCircle(mX, mY, 10, Path.Direction.CW);
 
-
             long timeStampMove = System.nanoTime() / 1000000;
             timeDifferenceMove = timeStampMove - timeStampStart;
             timeHold.add(timeDifferenceMove);
             xHold.add(x);
             yHold.add(y);
-
-            // Log.d("x: ", Float.toString(timeDifferenceMove));
-
-            // Start the thread that sends messages
 
             new Thread(new Runnable() {
                 public void run() {
@@ -284,17 +237,15 @@ public class DrawingView extends View {
                 }
 
             }).start();
-
         }
-
     }
 
     private void touch_up() {
         mPath.lineTo(mX, mY);
         circlePath.reset();
-        // commit the path to our offscreen
+        // commit the path to offscreen
         mCanvas.drawPath(mPath, mPaint);
-        // kill this so we don't double draw
+        // kill this so i don't double draw
         mPath.reset();
         clearOn = true;
         up = true;
@@ -310,10 +261,8 @@ public class DrawingView extends View {
         }
     }
 
-
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-
 
         float x = event.getX();
         float y = event.getY();
@@ -321,52 +270,38 @@ public class DrawingView extends View {
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
 
-
-                // clearDrawing();
                 touch_start(x, y);
                 invalidate();
                 break;
             case MotionEvent.ACTION_MOVE:
 
-
-                //  Log.d("xRaw: ", Float.toString(xRaw));
                 touch_move(x, y);
                 invalidate();
                 break;
             case MotionEvent.ACTION_UP:
 
-
                 touch_up();
                 invalidate();
-
-
                 break;
         }
-
-
         return true;
-
     }
 
+    //clear canvas
 
-    public void clearDrawing() {
-        //clear canvas
+    private void clearDrawing() {
+
         setDrawingCacheEnabled(false);
-
         onSizeChanged(width, height, width, height);
         setDrawingCacheEnabled(true);
     }
 
     //Looper
 
-    public void printDataFile() {
+    private void printDataFile() {
         System.gc();
 
         radio = ((DrawActivity2) getContext()).getSender();
-        speed = ((DrawActivity2) getContext()).getSpeed();
-        //  Log.d("speed", Float.toString(speed));
-        //Log.d("loopPort: ", Integer.toString(portNumber));
-        // Log.d("sender", Integer.toString(radio));
 
         try {
             Thread.sleep(16);
@@ -387,7 +322,8 @@ public class DrawingView extends View {
                     int pathSize = xHold.size();
                     i2 = pathSize - 1;
 
-//backward forward
+                    //backward forward
+
                     if (radio == 0) {
 
                         long now1 = System.nanoTime() / 1000000;
@@ -418,8 +354,6 @@ public class DrawingView extends View {
 
                                 adamsMath();
                                 sendMyOscMessage();
-
-                                //  Log.d("osc: ", "sent");
                                 i2--;
                             }
                         }
@@ -444,7 +378,6 @@ public class DrawingView extends View {
 
                                 adamsMath();
                                 sendMyOscMessage();
-                                //  Log.d("osc: ", "sent");
                                 i++;
                             }
                         }
@@ -459,7 +392,7 @@ public class DrawingView extends View {
                         }
                     }
 
-//backward loop
+                    //backward loop
 
                     if (radio == 2) {
 
@@ -492,7 +425,6 @@ public class DrawingView extends View {
 
                                 adamsMath();
                                 sendMyOscMessage();
-                                //  Log.d("osc: ", "sent");
                                 i2--;
                             }
                         }
@@ -507,7 +439,7 @@ public class DrawingView extends View {
                         }
                     }
 
-//forward loop
+                    //forward loop
 
                     if (radio == 1) {
 
@@ -515,7 +447,6 @@ public class DrawingView extends View {
                         while (i < pathSize) {
                             if (!up) {
                                 i = 0;
-
                                 break;
                             }
 
@@ -532,7 +463,6 @@ public class DrawingView extends View {
 
                                 adamsMath();
                                 sendMyOscMessage();
-                                //  Log.d("osc: ", "sent");
                                 i++;
                             }
                         }
@@ -555,18 +485,14 @@ public class DrawingView extends View {
     //set OSC UDP Port Connection
 
     private void setConnection() {
+
         int portNumber = ((DrawActivity2) getContext()).getPort();
         String targetIPStr = ((DrawActivity2) getContext()).getIp();
-       // Log.d("View port: ", Integer.toString(portNumber));
-      //  Log.d("View IP: ", "" + targetIPStr);
-        //portNumber = 8800;
         try {
             targetIP = InetAddress.getByName(targetIPStr);
-            //targetIP = InetAddress.getLocalHost();
 
         } catch (UnknownHostException e) {
             e.printStackTrace();
-            //toast(getString(R.string.notConnecting));
         }
 
         try {
@@ -577,31 +503,25 @@ public class DrawingView extends View {
             sender5 = new OSCPortOut(targetIP, portNumber + 4);
             sender6 = new OSCPortOut(targetIP, portNumber + 5);
             sender7 = new OSCPortOut(targetIP, portNumber + 6);
-            sender8 = new OSCPortOut(targetIP, portNumber + 7);//------set up outgoing ------
+            sender8 = new OSCPortOut(targetIP, portNumber + 7);
 
         } catch (SocketException e) {
             e.printStackTrace();
-            // toast(getString(R.string.notConnecting));
         }
-
     }
-
 
     //send OSC messages
 
     private void sendMyOscMessage() {
 
-
         try {
 
             if(!((DrawActivity2) getContext()).getPauser()){
-            radioTrack = ((DrawActivity2) getContext()).getTrack();
+
+                radioTrack = ((DrawActivity2) getContext()).getTrack();
             OSCMessage msgX1 = new OSCMessage();
             msgX1.setAddress("/X_1");
             msgX1.addArgument(x1);
-            // Log.d("radioTrack: ", Integer.toString(radioTrack));
-
-            // Log.d("x1/maxX: ", Float.toString(x1));
 
             OSCMessage msgY1 = new OSCMessage();
             msgY1.setAddress("/Y_1");
@@ -609,14 +529,9 @@ public class DrawingView extends View {
 
             sender1.send(msgX1);
             sender1.send(msgY1);
-            ///  sender1 = null;
-
 
                 switch (radioTrack) {
-
-
                     case 2: {
-
 
                         OSCMessage msgX4 = new OSCMessage();
                         msgX4.setAddress("/X_4");
@@ -630,19 +545,14 @@ public class DrawingView extends View {
 
                         sender4.send(msgX4);
                         sender4.send(msgY4);
-
-
                         break;
                     }
-
                     case 3: {
-
 
                         OSCMessage msgX3 = new OSCMessage();
                         msgX3.setAddress("/X_3");
                         msgX3.addArgument(x3);
 
-                        // Log.d("x1/maxX: ", Float.toString(x1));
 
                         OSCMessage msgY3 = new OSCMessage();
                         msgY3.setAddress("/Y_3");
@@ -655,7 +565,6 @@ public class DrawingView extends View {
                         msgX7.setAddress("/X_7");
                         msgX7.addArgument(x7);
 
-                        // Log.d("x1/maxX: ", Float.toString(x1));
 
                         OSCMessage msgY7 = new OSCMessage();
                         msgY7.setAddress("/Y_7");
@@ -666,37 +575,27 @@ public class DrawingView extends View {
                         sender7.send(msgY7);
                         break;
                     }
-
-
                     case 4: {
 
                         OSCMessage msgX6 = new OSCMessage();
                         msgX6.setAddress("/X_6");
                         msgX6.addArgument(x6);
 
-                        // Log.d("x1/maxX: ", Float.toString(x1));
 
                         OSCMessage msgY6 = new OSCMessage();
                         msgY6.setAddress("/Y_6");
                         msgY6.addArgument(y6);
 
-
                         sender6.send(msgX6);
                         sender6.send(msgY6);
-
-
                         break;
                     }
-
-
-
                     case 5: {
 
                         OSCMessage msgX2 = new OSCMessage();
                         msgX2.setAddress("/X_2");
                         msgX2.addArgument(x2);
 
-                        // Log.d("x1/maxX: ", Float.toString(x1));
 
                         OSCMessage msgY2 = new OSCMessage();
                         msgY2.setAddress("/Y_2");
@@ -704,7 +603,6 @@ public class DrawingView extends View {
 
                         sender2.send(msgX2);
                         sender2.send(msgY2);
-
                         break;
                     }
                     case 6:{
@@ -713,7 +611,6 @@ public class DrawingView extends View {
                         msgX3.setAddress("/X_3");
                         msgX3.addArgument(x3);
 
-                        // Log.d("x1/maxX: ", Float.toString(x1));
 
                         OSCMessage msgY3 = new OSCMessage();
                         msgY3.setAddress("/Y_3");
@@ -726,7 +623,6 @@ public class DrawingView extends View {
                         msgX5.setAddress("/X_5");
                         msgX5.addArgument(x5);
 
-                        // Log.d("x1/maxX: ", Float.toString(x1));
 
                         OSCMessage msgY5 = new OSCMessage();
                         msgY5.setAddress("/Y_5");
@@ -740,7 +636,6 @@ public class DrawingView extends View {
                         msgX7.setAddress("/X_7");
                         msgX7.addArgument(x7);
 
-                        // Log.d("x1/maxX: ", Float.toString(x1));
 
                         OSCMessage msgY7 = new OSCMessage();
                         msgY7.setAddress("/Y_7");
@@ -749,7 +644,6 @@ public class DrawingView extends View {
 
                         sender7.send(msgX7);
                         sender7.send(msgY7);
-
                         break;
                     }
                     case 7:{
@@ -758,7 +652,6 @@ public class DrawingView extends View {
                         msgX2.setAddress("/X_2");
                         msgX2.addArgument(x2);
 
-                        // Log.d("x1/maxX: ", Float.toString(x1));
 
                         OSCMessage msgY2 = new OSCMessage();
                         msgY2.setAddress("/Y_2");
@@ -771,7 +664,6 @@ public class DrawingView extends View {
                         msgX3.setAddress("/X_3");
                         msgX3.addArgument(x3);
 
-                        // Log.d("x1/maxX: ", Float.toString(x1));
 
                         OSCMessage msgY3 = new OSCMessage();
                         msgY3.setAddress("/Y_3");
@@ -784,7 +676,6 @@ public class DrawingView extends View {
                         msgX4.setAddress("/X_4");
                         msgX4.addArgument(x4);
 
-                        // Log.d("x1/maxX: ", Float.toString(x1));
 
                         OSCMessage msgY4 = new OSCMessage();
                         msgY4.setAddress("/Y_4");
@@ -794,12 +685,10 @@ public class DrawingView extends View {
                         sender4.send(msgY4);
 
 
-
                         OSCMessage msgX5 = new OSCMessage();
                         msgX5.setAddress("/X_5");
                         msgX5.addArgument(x5);
 
-                        // Log.d("x1/maxX: ", Float.toString(x1));
 
                         OSCMessage msgY5 = new OSCMessage();
                         msgY5.setAddress("/Y_5");
@@ -813,7 +702,6 @@ public class DrawingView extends View {
                         msgX6.setAddress("/X_6");
                         msgX6.addArgument(x6);
 
-                        // Log.d("x1/maxX: ", Float.toString(x1));
 
                         OSCMessage msgY6 = new OSCMessage();
                         msgY6.setAddress("/Y_6");
@@ -826,8 +714,6 @@ public class DrawingView extends View {
                         OSCMessage msgX7 = new OSCMessage();
                         msgX7.setAddress("/X_7");
                         msgX7.addArgument(x7);
-
-                        // Log.d("x1/maxX: ", Float.toString(x1));
 
                         OSCMessage msgY7 = new OSCMessage();
                         msgY7.setAddress("/Y_7");
@@ -841,28 +727,21 @@ public class DrawingView extends View {
                         msgX8.setAddress("/X_8");
                         msgX8.addArgument(x8);
 
-                        // Log.d("x1/maxX: ", Float.toString(x1));
-
                         OSCMessage msgY8 = new OSCMessage();
                         msgY8.setAddress("/Y_8");
                         msgY8.addArgument(y8);
 
                         sender8.send(msgX8);
                         sender8.send(msgY8);
-
                         break;
                     }
                     default: {
-
-
                         break;
-
-
                     }
                 }
             }
 
-        } catch (Exception e) {
+        } catch (Exception ignored) {
 
         }
 

@@ -1,9 +1,7 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name">DGTOSC</string>
-    <string name="connected" tools:ignore="UnusedResources">Connected</string>
+    <string name="connected">Connection Successful</string>
     <string name="notConnected" tools:ignore="UnusedResources">Not Connected</string>
-    <string name="draw">Draw</string>
-    <string name="generate">Generate</string>
     <string name="ip">IP Address:</string>
     <string name="ipHint" tools:ignore="UnusedResources">127.0.0.1</string>
     <string name="Port">Port:</string>
@@ -12,31 +10,28 @@
     <string name="drawOr" tools:ignore="UnusedResources">Draw/Generate  </string>
     <string name="next">Next</string>
     <string name="notConnecting" tools:ignore="UnusedResources">Not Connecting…</string>
-    <string name="selectOne">Please select Draw or Generate</string>
-    <string name="instruct">Please enter IP Address and Port Number, then select Draw or Generate</string>
-    <string name="ipInvalid" tools:ignore="UnusedResources">Invalid IP Address</string>
+    <string name="instruct">Please enter IP Address and Port Number, then press connect.</string>
+    <string name="ipInvalid">Invalid IP Address or Port Number</string>
     <string name="clear" tools:ignore="UnusedResources">Clear</string>
-
-    <string name="speed">Speed</string>
     <string name="pause">Pause</string>
-    <string name="present">Present</string>
     <string name="backwardForward">Backward/Forward</string>
     <string name="backward">Backward</string>
     <string name="forward">Forward</string>
     <string name="loopType">Loop Type</string>
-    <string name="instructions">Hello, im am a bunch of instructions...... </string>
+    <string name="instructions">Notice: When you enter your port number, 3 consecutive ports are opened as well.
+        Two messages are sent for each port. Messages are sent as follows. [Port# - \"X_1\", \"Y_1\"] [Port# - \"X_2\", \"Y_2\"] [Port# +1 - \"X_3\", \"Y_3\"]
+    [Port# +1 - \"X_4\", \"Y_4\"] [Port# +2 - \"X_5\", \"Y_5\"] [Port# +2 - \"X_6\", \"Y_6\"] [Port# +3 - \"X_7\", \"Y_7\"]
+    [Port# +3 - \"X_8\", \"Y_8\"]</string>
 
-    <string name="out1">Speed</string>
-    <string name="out2">Speed</string>
-    <string name="out3">Speed</string>
-    <string name="out4">Speed</string>
-    <string name="out5">Speed</string>
-    <string name="out6">Speed</string>
-    <string name="out7">Speed</string>
+    <string name="out1">[1]</string>
+    <string name="out2">[1][3][7]</string>
+    <string name="out3">[1][4]</string>
+    <string name="out4">[1][6]</string>
+    <string name="out5">[1][2]</string>
+    <string name="out6">[1][3][5][7]</string>
+    <string name="out7">[1] … [8]</string>
 
 
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment" tools:ignore="UnusedResources">Hello blank fragment</string>
     <string name="title_activity_draw2">DrawActivity2</string>
 
 
