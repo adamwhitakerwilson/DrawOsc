@@ -7,6 +7,7 @@ import android.content.Intent;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.text.method.ScrollingMovementMethod;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -25,6 +26,7 @@ public class MainActivity extends AppCompatActivity {
     private EditText ipTx;
     private EditText portTx;
     private TextView validDisplay;
+    private  TextView instructions;
     private InetAddress targetIP;
     private String targetIPStr;
     private int portNumber;
@@ -41,9 +43,10 @@ public class MainActivity extends AppCompatActivity {
         ipTx = (EditText) findViewById(R.id.editTextIpAddress);
         portTx = (EditText) findViewById(R.id.editTextPort);
         validDisplay = (TextView) findViewById(R.id.textViewValidate);
+        instructions = (TextView) findViewById(R.id.textViewInstructions);
+        instructions.setMovementMethod(new ScrollingMovementMethod());
 
-
-//Button Listeners
+        //Button Listeners
 
         butConnect.setOnClickListener(new View.OnClickListener() {
             @Override
