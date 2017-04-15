@@ -7,6 +7,7 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
@@ -53,9 +54,10 @@ public class DrawingView extends View {
     private int height;
     private long timeDifferenceTotal;
     private int radio;
-    private int radioTrack = 1;
+    private int radioTrack;
     private int maxX = 500;
     private int maxY = 250;
+    private int idTrack;
     //network variables
     private OSCPortOut sender1 = null;
     private OSCPortOut sender2 = null;
@@ -84,11 +86,8 @@ public class DrawingView extends View {
     private float x8;
     private float y8;
     private long timeStampStart;
-    //triggers
-    private boolean to = false;
     private boolean clearOn = false;
     private boolean up = true;
-    private long timeDifferenceMove;
     private Bitmap mBitmap;
     private Canvas mCanvas;
     private float mX, mY;
@@ -118,6 +117,8 @@ public class DrawingView extends View {
         setConnection();
 
         isInEditMode();
+        radioTrack = 1;
+        idTrack = 1;
     }
 
     @Override
@@ -183,8 +184,6 @@ public class DrawingView extends View {
             e.printStackTrace();
         }
 
-        to = true;
-
         if (xHold.size() != 0) {
             xHold.clear();
             yHold.clear();
@@ -221,7 +220,7 @@ public class DrawingView extends View {
             circlePath.addCircle(mX, mY, 10, Path.Direction.CW);
 
             long timeStampMove = System.nanoTime() / 1000000;
-            timeDifferenceMove = timeStampMove - timeStampStart;
+            long timeDifferenceMove = timeStampMove - timeStampStart;
             timeHold.add(timeDifferenceMove);
             xHold.add(x);
             yHold.add(y);
@@ -252,7 +251,6 @@ public class DrawingView extends View {
 
         long timeStampEnd = System.nanoTime() / 1000000;
         timeDifferenceTotal = timeStampEnd - timeStampStart;
-        to = false;
         try {
             Thread.sleep(20);
             printDataFile();
@@ -518,231 +516,1270 @@ public class DrawingView extends View {
 
             if(!((DrawActivity2) getContext()).getPauser()){
 
+                idTrack = ((DrawActivity2) getContext()).getIdTrack();
                 radioTrack = ((DrawActivity2) getContext()).getTrack();
-            OSCMessage msgX1 = new OSCMessage();
-            msgX1.setAddress("/X_1");
-            msgX1.addArgument(x1);
+                OSCMessage msgX1 = new OSCMessage();
+                OSCMessage msgY1 = new OSCMessage();
+                OSCMessage msgX2 = new OSCMessage();
+                OSCMessage msgY2 = new OSCMessage();
+                OSCMessage msgX3 = new OSCMessage();
+                OSCMessage msgY3 = new OSCMessage();
+                OSCMessage msgX4 = new OSCMessage();
+                OSCMessage msgY4 = new OSCMessage();
+                OSCMessage msgX5 = new OSCMessage();
+                OSCMessage msgY5 = new OSCMessage();
+                OSCMessage msgX6 = new OSCMessage();
+                OSCMessage msgY6 = new OSCMessage();
+                OSCMessage msgX7 = new OSCMessage();
+                OSCMessage msgY7 = new OSCMessage();
+                OSCMessage msgX8 = new OSCMessage();
+                OSCMessage msgY8 = new OSCMessage();
+                msgX1.setAddress("/X_1");
+                msgY1.setAddress("/Y_1");
+                msgX2.setAddress("/X_2");
+                msgY2.setAddress("/Y_2");
+                msgX3.setAddress("/X_3");
+                msgY3.setAddress("/Y_3");
+                msgX4.setAddress("/X_4");
+                msgY4.setAddress("/Y_4");
+                msgX5.setAddress("/X_5");
+                msgY5.setAddress("/Y_5");
+                msgX6.setAddress("/X_6");
+                msgY6.setAddress("/Y_6");
+                msgX7.setAddress("/X_7");
+                msgY7.setAddress("/Y_7");
+                msgX8.setAddress("/X_8");
+                msgY8.setAddress("/Y_8");
 
-            OSCMessage msgY1 = new OSCMessage();
-            msgY1.setAddress("/Y_1");
-            msgY1.addArgument(y1);
 
-            sender1.send(msgX1);
-            sender1.send(msgY1);
 
-                switch (radioTrack) {
+                switch (idTrack) {
+
+                    case 1: {
+                        switch (radioTrack) {
+                            case 1: {
+                                msgX1.addArgument(x1);
+                                msgY1.addArgument(y1);
+                                sender1.send(msgX1);
+                                sender1.send(msgY1);
+                                break;
+                            }
+                            case 2: {
+                                msgX1.addArgument(x1);
+                                msgY1.addArgument(y1);
+                                sender1.send(msgX1);
+                                sender1.send(msgY1);
+
+                                msgX4.addArgument(x4);
+                                msgY4.addArgument(y4);
+                                sender4.send(msgX4);
+                                sender4.send(msgY4);
+                                break;
+                            }
+                            case 3: {
+                                msgX1.addArgument(x1);
+                                msgY1.addArgument(y1);
+                                sender1.send(msgX1);
+                                sender1.send(msgY1);
+
+
+                                msgX3.addArgument(x3);
+                                msgY3.addArgument(y3);
+                                sender3.send(msgX3);
+                                sender3.send(msgY3);
+
+
+                                msgX7.addArgument(x7);
+                                msgY7.addArgument(y7);
+                                sender7.send(msgX7);
+                                sender7.send(msgY7);
+                                break;
+                            }
+                            case 4: {
+                                msgX1.addArgument(x1);
+                                msgY1.addArgument(y1);
+                                sender1.send(msgX1);
+                                sender1.send(msgY1);
+
+
+                                msgX6.addArgument(x6);
+                                msgY6.addArgument(y6);
+                                sender6.send(msgX6);
+                                sender6.send(msgY6);
+                                break;
+                            }
+                            case 5: {
+
+                                msgX1.addArgument(x1);
+                                msgY1.addArgument(y1);
+                                sender1.send(msgX1);
+                                sender1.send(msgY1);
+
+
+                                msgX2.addArgument(x2);
+                                msgY2.addArgument(y2);
+                                sender2.send(msgX2);
+                                sender2.send(msgY2);
+                                break;
+                            }
+                            case 6: {
+
+                                msgX1.addArgument(x1);
+                                msgY1.addArgument(y1);
+                                sender1.send(msgX1);
+                                sender1.send(msgY1);
+
+
+                                msgX3.addArgument(x3);
+                                msgY3.addArgument(y3);
+                                sender3.send(msgX3);
+                                sender3.send(msgY3);
+
+
+                                msgX5.addArgument(x5);
+                                msgY5.addArgument(y5);
+                                sender5.send(msgX5);
+                                sender5.send(msgY5);
+
+
+                                msgX7.addArgument(x7);
+                                msgY7.addArgument(y7);
+                                sender7.send(msgX7);
+                                sender7.send(msgY7);
+                                break;
+                            }
+                            case 7: {
+
+                                msgX1.addArgument(x1);
+                                msgY1.addArgument(y1);
+                                sender1.send(msgX1);
+                                sender1.send(msgY1);
+
+
+                                msgX2.addArgument(x2);
+                                msgY2.addArgument(y2);
+                                sender2.send(msgX2);
+                                sender2.send(msgY2);
+
+
+                                msgX3.addArgument(x3);
+                                msgY3.addArgument(y3);
+                                sender3.send(msgX3);
+                                sender3.send(msgY3);
+
+
+                                msgX4.addArgument(x4);
+                                msgY4.addArgument(y4);
+                                sender4.send(msgX4);
+                                sender4.send(msgY4);
+
+                                msgX5.addArgument(x5);
+                                msgY5.addArgument(y5);
+                                sender5.send(msgX5);
+                                sender5.send(msgY5);
+
+
+                                msgX6.addArgument(x6);
+                                msgY6.addArgument(y6);
+                                sender6.send(msgX6);
+                                sender6.send(msgY6);
+
+
+                                msgX7.addArgument(x7);
+                                msgY7.addArgument(y7);
+                                sender7.send(msgX7);
+                                sender7.send(msgY7);
+
+                                msgX8.addArgument(x8);
+                                msgY8.addArgument(y8);
+                                sender8.send(msgX8);
+                                sender8.send(msgY8);
+                                break;
+                            }
+                            default: {
+                                break;
+                            }
+                        }
+
+                        break;
+                    }
                     case 2: {
 
-                        OSCMessage msgX4 = new OSCMessage();
-                        msgX4.setAddress("/X_4");
-                        msgX4.addArgument(x4);
+                        switch (radioTrack) {
+                            case 1: {
 
-                        // Log.d("x1/maxX: ", Float.toString(x1));
 
-                        OSCMessage msgY4 = new OSCMessage();
-                        msgY4.setAddress("/Y_4");
-                        msgY4.addArgument(y4);
+                                msgX2.addArgument(x1);
+                                msgY2.addArgument(y1);
+                                sender2.send(msgX2);
+                                sender2.send(msgY2);
+                                break;
+                            }
+                            case 2: {
 
-                        sender4.send(msgX4);
-                        sender4.send(msgY4);
+                                msgX2.addArgument(x1);
+                                msgY2.addArgument(y1);
+                                sender2.send(msgX2);
+                                sender2.send(msgY2);
+
+                                msgX5.addArgument(x4);
+                                msgY5.addArgument(y4);
+                                sender5.send(msgX5);
+                                sender5.send(msgY5);
+                                break;
+                            }
+                            case 3: {
+
+                                msgX2.addArgument(x1);
+                                msgY2.addArgument(y1);
+                                sender2.send(msgX2);
+                                sender2.send(msgY2);
+
+
+                                msgX4.addArgument(x3);
+                                msgY4.addArgument(y3);
+                                sender4.send(msgX4);
+                                sender4.send(msgY4);
+
+
+                                msgX8.addArgument(x7);
+                                msgY8.addArgument(y7);
+                                sender8.send(msgX8);
+                                sender8.send(msgY8);
+                                break;
+                            }
+                            case 4: {
+
+                                msgX2.addArgument(x1);
+                                msgY2.addArgument(y1);
+                                sender2.send(msgX2);
+                                sender2.send(msgY2);
+
+
+                                msgX7.addArgument(x6);
+                                msgY7.addArgument(y6);
+                                sender7.send(msgX7);
+                                sender7.send(msgY7);
+                                break;
+                            }
+                            case 5: {
+
+                                msgX2.addArgument(x1);
+                                msgY2.addArgument(y1);
+                                sender2.send(msgX2);
+                                sender2.send(msgY2);
+
+
+                                msgX3.addArgument(x2);
+                                msgY3.addArgument(y2);
+                                sender3.send(msgX3);
+                                sender3.send(msgY3);
+                                break;
+                            }
+                            case 6: {
+
+                                msgX2.addArgument(x1);
+                                msgY2.addArgument(y1);
+                                sender2.send(msgX2);
+                                sender2.send(msgY2);
+
+
+                                msgX4.addArgument(x3);
+                                msgY4.addArgument(y3);
+                                sender4.send(msgX4);
+                                sender4.send(msgY4);
+
+
+                                msgX6.addArgument(x5);
+                                msgY6.addArgument(y5);
+                                sender6.send(msgX6);
+                                sender6.send(msgY6);
+
+
+                                msgX8.addArgument(x7);
+                                msgY8.addArgument(y7);
+                                sender8.send(msgX8);
+                                sender8.send(msgY8);
+                                break;
+                            }
+                            case 7: {
+
+                                msgX2.addArgument(x1);
+                                msgY2.addArgument(y1);
+                                sender2.send(msgX2);
+                                sender2.send(msgY2);
+
+
+                                msgX3.addArgument(x2);
+                                msgY3.addArgument(y2);
+                                sender3.send(msgX3);
+                                sender3.send(msgY3);
+
+
+                                msgX4.addArgument(x3);
+                                msgY4.addArgument(y3);
+                                sender4.send(msgX4);
+                                sender4.send(msgY4);
+
+
+                                msgX5.addArgument(x4);
+                                msgY5.addArgument(y4);
+                                sender5.send(msgX5);
+                                sender5.send(msgY5);
+
+                                msgX6.addArgument(x5);
+                                msgY6.addArgument(y5);
+                                sender6.send(msgX6);
+                                sender6.send(msgY6);
+
+
+                                msgX7.addArgument(x6);
+                                msgY7.addArgument(y6);
+                                sender7.send(msgX7);
+                                sender7.send(msgY7);
+
+
+                                msgX8.addArgument(x7);
+                                msgY8.addArgument(y7);
+                                sender8.send(msgX8);
+                                sender8.send(msgY8);
+
+                                msgX1.addArgument(x8);
+                                msgY1.addArgument(y8);
+                                sender1.send(msgX1);
+                                sender1.send(msgY1);
+                                break;
+                            }
+                            default: {
+                                break;
+                            }
+                        }
+
                         break;
                     }
                     case 3: {
-
-                        OSCMessage msgX3 = new OSCMessage();
-                        msgX3.setAddress("/X_3");
-                        msgX3.addArgument(x3);
+                        switch (radioTrack) {
+                            case 1: {
 
 
-                        OSCMessage msgY3 = new OSCMessage();
-                        msgY3.setAddress("/Y_3");
-                        msgY3.addArgument(y3);
+                                msgX3.addArgument(x1);
+                                msgY3.addArgument(y1);
+                                sender3.send(msgX3);
+                                sender3.send(msgY3);
+                                break;
+                            }
+                            case 2: {
 
-                        sender3.send(msgX3);
-                        sender3.send(msgY3);
+                                msgX3.addArgument(x1);
+                                msgY3.addArgument(y1);
+                                sender3.send(msgX3);
+                                sender3.send(msgY3);
 
-                        OSCMessage msgX7 = new OSCMessage();
-                        msgX7.setAddress("/X_7");
-                        msgX7.addArgument(x7);
+                                msgX6.addArgument(x4);
+                                msgY6.addArgument(y4);
+                                sender6.send(msgX6);
+                                sender6.send(msgY6);
+                                break;
+                            }
+                            case 3: {
+
+                                msgX3.addArgument(x1);
+                                msgY3.addArgument(y1);
+                                sender3.send(msgX3);
+                                sender3.send(msgY3);
 
 
-                        OSCMessage msgY7 = new OSCMessage();
-                        msgY7.setAddress("/Y_7");
-                        msgY7.addArgument(y7);
+                                msgX5.addArgument(x3);
+                                msgY5.addArgument(y3);
+                                sender5.send(msgX5);
+                                sender5.send(msgY5);
 
 
-                        sender7.send(msgX7);
-                        sender7.send(msgY7);
+                                msgX1.addArgument(x7);
+                                msgY1.addArgument(y7);
+                                sender1.send(msgX1);
+                                sender1.send(msgY1);
+                                break;
+                            }
+                            case 4: {
+
+                                msgX3.addArgument(x1);
+                                msgY3.addArgument(y1);
+                                sender3.send(msgX3);
+                                sender3.send(msgY3);
+
+
+                                msgX8.addArgument(x6);
+                                msgY8.addArgument(y6);
+                                sender8.send(msgX8);
+                                sender8.send(msgY8);
+                                break;
+                            }
+                            case 5: {
+
+                                msgX3.addArgument(x1);
+                                msgY3.addArgument(y1);
+                                sender3.send(msgX3);
+                                sender3.send(msgY3);
+
+
+                                msgX4.addArgument(x2);
+                                msgY4.addArgument(y2);
+                                sender4.send(msgX4);
+                                sender4.send(msgY4);
+                                break;
+                            }
+                            case 6: {
+
+                                msgX3.addArgument(x1);
+                                msgY3.addArgument(y1);
+                                sender3.send(msgX3);
+                                sender3.send(msgY3);
+
+
+                                msgX5.addArgument(x3);
+                                msgY5.addArgument(y3);
+                                sender5.send(msgX5);
+                                sender5.send(msgY5);
+
+
+                                msgX7.addArgument(x5);
+                                msgY7.addArgument(y5);
+                                sender7.send(msgX7);
+                                sender7.send(msgY7);
+
+
+                                msgX1.addArgument(x7);
+                                msgY1.addArgument(y7);
+                                sender1.send(msgX1);
+                                sender1.send(msgY1);
+                                break;
+                            }
+                            case 7: {
+
+                                msgX3.addArgument(x1);
+                                msgY3.addArgument(y1);
+                                sender3.send(msgX3);
+                                sender3.send(msgY3);
+
+
+                                msgX4.addArgument(x2);
+                                msgY4.addArgument(y2);
+                                sender4.send(msgX4);
+                                sender4.send(msgY4);
+
+
+                                msgX5.addArgument(x3);
+                                msgY5.addArgument(y3);
+                                sender5.send(msgX5);
+                                sender5.send(msgY5);
+
+
+                                msgX6.addArgument(x4);
+                                msgY6.addArgument(y4);
+                                sender6.send(msgX6);
+                                sender6.send(msgY6);
+
+                                msgX7.addArgument(x5);
+                                msgY7.addArgument(y5);
+                                sender7.send(msgX7);
+                                sender7.send(msgY7);
+
+
+                                msgX8.addArgument(x6);
+                                msgY8.addArgument(y6);
+                                sender8.send(msgX8);
+                                sender8.send(msgY8);
+
+
+                                msgX1.addArgument(x7);
+                                msgY1.addArgument(y7);
+                                sender1.send(msgX1);
+                                sender1.send(msgY1);
+
+                                msgX2.addArgument(x8);
+                                msgY2.addArgument(y8);
+                                sender2.send(msgX2);
+                                sender2.send(msgY2);
+                                break;
+                            }
+                            default: {
+                                break;
+                            }
+                        }
                         break;
                     }
                     case 4: {
-
-                        OSCMessage msgX6 = new OSCMessage();
-                        msgX6.setAddress("/X_6");
-                        msgX6.addArgument(x6);
+                        switch (radioTrack) {
+                            case 1: {
 
 
-                        OSCMessage msgY6 = new OSCMessage();
-                        msgY6.setAddress("/Y_6");
-                        msgY6.addArgument(y6);
+                                msgX4.addArgument(x1);
+                                msgY4.addArgument(y1);
+                                sender4.send(msgX4);
+                                sender4.send(msgY4);
+                                break;
+                            }
+                            case 2: {
 
-                        sender6.send(msgX6);
-                        sender6.send(msgY6);
+                                msgX4.addArgument(x1);
+                                msgY4.addArgument(y1);
+                                sender4.send(msgX4);
+                                sender4.send(msgY4);
+
+                                msgX7.addArgument(x4);
+                                msgY7.addArgument(y4);
+                                sender7.send(msgX7);
+                                sender7.send(msgY7);
+                                break;
+                            }
+                            case 3: {
+
+                                msgX4.addArgument(x1);
+                                msgY4.addArgument(y1);
+                                sender4.send(msgX4);
+                                sender4.send(msgY4);
+
+
+                                msgX6.addArgument(x3);
+                                msgY6.addArgument(y3);
+                                sender6.send(msgX6);
+                                sender6.send(msgY6);
+
+
+                                msgX2.addArgument(x7);
+                                msgY2.addArgument(y7);
+                                sender2.send(msgX2);
+                                sender2.send(msgY2);
+                                break;
+                            }
+                            case 4: {
+
+                                msgX4.addArgument(x1);
+                                msgY4.addArgument(y1);
+                                sender4.send(msgX4);
+                                sender4.send(msgY4);
+
+
+                                msgX1.addArgument(x6);
+                                msgY1.addArgument(y6);
+                                sender1.send(msgX1);
+                                sender1.send(msgY1);
+                                break;
+                            }
+                            case 5: {
+
+                                msgX4.addArgument(x1);
+                                msgY4.addArgument(y1);
+                                sender4.send(msgX4);
+                                sender4.send(msgY4);
+
+
+                                msgX5.addArgument(x2);
+                                msgY5.addArgument(y2);
+                                sender5.send(msgX5);
+                                sender5.send(msgY5);
+                                break;
+                            }
+                            case 6: {
+
+                                msgX4.addArgument(x1);
+                                msgY4.addArgument(y1);
+                                sender4.send(msgX4);
+                                sender4.send(msgY4);
+
+
+                                msgX6.addArgument(x3);
+                                msgY6.addArgument(y3);
+                                sender6.send(msgX6);
+                                sender6.send(msgY6);
+
+
+                                msgX8.addArgument(x5);
+                                msgY8.addArgument(y5);
+                                sender8.send(msgX8);
+                                sender8.send(msgY8);
+
+
+                                msgX2.addArgument(x7);
+                                msgY2.addArgument(y7);
+                                sender2.send(msgX2);
+                                sender2.send(msgY2);
+                                break;
+                            }
+                            case 7: {
+
+                                msgX4.addArgument(x1);
+                                msgY4.addArgument(y1);
+                                sender4.send(msgX4);
+                                sender4.send(msgY4);
+
+
+                                msgX5.addArgument(x2);
+                                msgY5.addArgument(y2);
+                                sender5.send(msgX5);
+                                sender5.send(msgY5);
+
+
+                                msgX6.addArgument(x3);
+                                msgY6.addArgument(y3);
+                                sender6.send(msgX6);
+                                sender6.send(msgY6);
+
+
+                                msgX7.addArgument(x4);
+                                msgY7.addArgument(y4);
+                                sender7.send(msgX7);
+                                sender7.send(msgY7);
+
+                                msgX8.addArgument(x5);
+                                msgY8.addArgument(y5);
+                                sender8.send(msgX8);
+                                sender8.send(msgY8);
+
+
+                                msgX1.addArgument(x6);
+                                msgY1.addArgument(y6);
+                                sender1.send(msgX1);
+                                sender1.send(msgY1);
+
+
+                                msgX2.addArgument(x7);
+                                msgY2.addArgument(y7);
+                                sender2.send(msgX2);
+                                sender2.send(msgY2);
+
+                                msgX3.addArgument(x8);
+                                msgY3.addArgument(y8);
+                                sender3.send(msgX3);
+                                sender3.send(msgY3);
+                                break;
+                            }
+                            default: {
+                                break;
+                            }
+                        }
                         break;
                     }
                     case 5: {
-
-                        OSCMessage msgX2 = new OSCMessage();
-                        msgX2.setAddress("/X_2");
-                        msgX2.addArgument(x2);
+                        switch (radioTrack) {
+                            case 1: {
 
 
-                        OSCMessage msgY2 = new OSCMessage();
-                        msgY2.setAddress("/Y_2");
-                        msgY2.addArgument(y2);
+                                msgX5.addArgument(x1);
+                                msgY5.addArgument(y1);
+                                sender5.send(msgX5);
+                                sender5.send(msgY5);
+                                break;
+                            }
+                            case 2: {
 
-                        sender2.send(msgX2);
-                        sender2.send(msgY2);
+                                msgX5.addArgument(x1);
+                                msgY5.addArgument(y1);
+                                sender5.send(msgX5);
+                                sender5.send(msgY5);
+
+                                msgX8.addArgument(x4);
+                                msgY8.addArgument(y4);
+                                sender8.send(msgX8);
+                                sender8.send(msgY8);
+                                break;
+                            }
+                            case 3: {
+
+                                msgX5.addArgument(x1);
+                                msgY5.addArgument(y1);
+                                sender5.send(msgX5);
+                                sender5.send(msgY5);
+
+
+                                msgX7.addArgument(x3);
+                                msgY7.addArgument(y3);
+                                sender7.send(msgX7);
+                                sender7.send(msgY7);
+
+
+                                msgX3.addArgument(x7);
+                                msgY3.addArgument(y7);
+                                sender3.send(msgX3);
+                                sender3.send(msgY3);
+                                break;
+                            }
+                            case 4: {
+
+                                msgX5.addArgument(x1);
+                                msgY5.addArgument(y1);
+                                sender5.send(msgX5);
+                                sender5.send(msgY5);
+
+
+                                msgX2.addArgument(x6);
+                                msgY2.addArgument(y6);
+                                sender2.send(msgX2);
+                                sender2.send(msgY2);
+                                break;
+                            }
+                            case 5: {
+
+                                msgX5.addArgument(x1);
+                                msgY5.addArgument(y1);
+                                sender5.send(msgX5);
+                                sender5.send(msgY5);
+
+
+                                msgX6.addArgument(x2);
+                                msgY6.addArgument(y2);
+                                sender6.send(msgX6);
+                                sender6.send(msgY6);
+                                break;
+                            }
+                            case 6: {
+
+                                msgX5.addArgument(x1);
+                                msgY5.addArgument(y1);
+                                sender5.send(msgX5);
+                                sender5.send(msgY5);
+
+
+                                msgX7.addArgument(x3);
+                                msgY7.addArgument(y3);
+                                sender7.send(msgX7);
+                                sender7.send(msgY7);
+
+
+                                msgX1.addArgument(x5);
+                                msgY1.addArgument(y5);
+                                sender1.send(msgX1);
+                                sender1.send(msgY1);
+
+
+                                msgX3.addArgument(x7);
+                                msgY3.addArgument(y7);
+                                sender3.send(msgX3);
+                                sender3.send(msgY3);
+                                break;
+                            }
+                            case 7: {
+
+                                msgX5.addArgument(x1);
+                                msgY5.addArgument(y1);
+                                sender5.send(msgX5);
+                                sender5.send(msgY5);
+
+
+                                msgX6.addArgument(x2);
+                                msgY6.addArgument(y2);
+                                sender6.send(msgX6);
+                                sender6.send(msgY6);
+
+
+                                msgX7.addArgument(x3);
+                                msgY7.addArgument(y3);
+                                sender7.send(msgX7);
+                                sender7.send(msgY7);
+
+
+                                msgX8.addArgument(x4);
+                                msgY8.addArgument(y4);
+                                sender8.send(msgX8);
+                                sender8.send(msgY8);
+
+                                msgX1.addArgument(x5);
+                                msgY1.addArgument(y5);
+                                sender1.send(msgX1);
+                                sender1.send(msgY1);
+
+
+                                msgX2.addArgument(x6);
+                                msgY2.addArgument(y6);
+                                sender2.send(msgX2);
+                                sender2.send(msgY2);
+
+
+                                msgX3.addArgument(x7);
+                                msgY3.addArgument(y7);
+                                sender3.send(msgX3);
+                                sender3.send(msgY3);
+
+                                msgX4.addArgument(x8);
+                                msgY4.addArgument(y8);
+                                sender4.send(msgX4);
+                                sender4.send(msgY4);
+                                break;
+                            }
+                            default: {
+                                break;
+                            }
+                        }
                         break;
                     }
-                    case 6:{
-
-                        OSCMessage msgX3 = new OSCMessage();
-                        msgX3.setAddress("/X_3");
-                        msgX3.addArgument(x3);
+                    case 6: {
+                        switch (radioTrack) {
+                            case 1: {
 
 
-                        OSCMessage msgY3 = new OSCMessage();
-                        msgY3.setAddress("/Y_3");
-                        msgY3.addArgument(y3);
+                                msgX6.addArgument(x1);
+                                msgY6.addArgument(y1);
+                                sender6.send(msgX6);
+                                sender6.send(msgY6);
+                                break;
+                            }
+                            case 2: {
 
-                        sender3.send(msgX3);
-                        sender3.send(msgY3);
+                                msgX6.addArgument(x1);
+                                msgY6.addArgument(y1);
+                                sender6.send(msgX6);
+                                sender6.send(msgY6);
 
-                        OSCMessage msgX5 = new OSCMessage();
-                        msgX5.setAddress("/X_5");
-                        msgX5.addArgument(x5);
+                                msgX1.addArgument(x4);
+                                msgY1.addArgument(y4);
+                                sender1.send(msgX1);
+                                sender1.send(msgY1);
+                                break;
+                            }
+                            case 3: {
 
-
-                        OSCMessage msgY5 = new OSCMessage();
-                        msgY5.setAddress("/Y_5");
-                        msgY5.addArgument(y5);
-
-                        sender5.send(msgX5);
-                        sender5.send(msgY5);
-
-
-                        OSCMessage msgX7 = new OSCMessage();
-                        msgX7.setAddress("/X_7");
-                        msgX7.addArgument(x7);
-
-
-                        OSCMessage msgY7 = new OSCMessage();
-                        msgY7.setAddress("/Y_7");
-                        msgY7.addArgument(y7);
+                                msgX6.addArgument(x1);
+                                msgY6.addArgument(y1);
+                                sender6.send(msgX6);
+                                sender6.send(msgY6);
 
 
-                        sender7.send(msgX7);
-                        sender7.send(msgY7);
+                                msgX8.addArgument(x3);
+                                msgY8.addArgument(y3);
+                                sender8.send(msgX8);
+                                sender8.send(msgY8);
+
+
+                                msgX4.addArgument(x7);
+                                msgY4.addArgument(y7);
+                                sender4.send(msgX4);
+                                sender4.send(msgY4);
+                                break;
+                            }
+                            case 4: {
+
+                                msgX6.addArgument(x1);
+                                msgY6.addArgument(y1);
+                                sender6.send(msgX6);
+                                sender6.send(msgY6);
+
+
+                                msgX3.addArgument(x6);
+                                msgY3.addArgument(y6);
+                                sender3.send(msgX3);
+                                sender3.send(msgY3);
+                                break;
+                            }
+                            case 5: {
+
+                                msgX6.addArgument(x1);
+                                msgY6.addArgument(y1);
+                                sender6.send(msgX6);
+                                sender6.send(msgY6);
+
+
+                                msgX7.addArgument(x2);
+                                msgY7.addArgument(y2);
+                                sender7.send(msgX7);
+                                sender7.send(msgY7);
+                                break;
+                            }
+                            case 6: {
+
+                                msgX6.addArgument(x1);
+                                msgY6.addArgument(y1);
+                                sender6.send(msgX6);
+                                sender6.send(msgY6);
+
+
+                                msgX8.addArgument(x3);
+                                msgY8.addArgument(y3);
+                                sender8.send(msgX8);
+                                sender8.send(msgY8);
+
+
+                                msgX2.addArgument(x5);
+                                msgY2.addArgument(y5);
+                                sender2.send(msgX2);
+                                sender2.send(msgY2);
+
+
+                                msgX4.addArgument(x7);
+                                msgY4.addArgument(y7);
+                                sender4.send(msgX4);
+                                sender4.send(msgY4);
+                                break;
+                            }
+                            case 7: {
+
+                                msgX6.addArgument(x1);
+                                msgY6.addArgument(y1);
+                                sender6.send(msgX6);
+                                sender6.send(msgY6);
+
+
+                                msgX7.addArgument(x2);
+                                msgY7.addArgument(y2);
+                                sender7.send(msgX7);
+                                sender7.send(msgY7);
+
+
+                                msgX8.addArgument(x3);
+                                msgY8.addArgument(y3);
+                                sender8.send(msgX8);
+                                sender8.send(msgY8);
+
+
+                                msgX1.addArgument(x4);
+                                msgY1.addArgument(y4);
+                                sender1.send(msgX1);
+                                sender1.send(msgY1);
+
+                                msgX2.addArgument(x5);
+                                msgY2.addArgument(y5);
+                                sender2.send(msgX2);
+                                sender2.send(msgY2);
+
+
+                                msgX3.addArgument(x6);
+                                msgY3.addArgument(y6);
+                                sender3.send(msgX3);
+                                sender3.send(msgY3);
+
+
+                                msgX4.addArgument(x7);
+                                msgY4.addArgument(y7);
+                                sender4.send(msgX4);
+                                sender4.send(msgY4);
+
+                                msgX5.addArgument(x8);
+                                msgY5.addArgument(y8);
+                                sender5.send(msgX5);
+                                sender5.send(msgY5);
+                                break;
+                            }
+                            default: {
+                                break;
+                            }
+                        }
                         break;
                     }
-                    case 7:{
-
-                        OSCMessage msgX2 = new OSCMessage();
-                        msgX2.setAddress("/X_2");
-                        msgX2.addArgument(x2);
+                    case 7: {
+                        switch (radioTrack) {
+                            case 1: {
 
 
-                        OSCMessage msgY2 = new OSCMessage();
-                        msgY2.setAddress("/Y_2");
-                        msgY2.addArgument(y2);
+                                msgX7.addArgument(x1);
+                                msgY7.addArgument(y1);
+                                sender7.send(msgX7);
+                                sender7.send(msgY7);
+                                break;
+                            }
+                            case 2: {
 
-                        sender2.send(msgX2);
-                        sender2.send(msgY2);
+                                msgX7.addArgument(x1);
+                                msgY7.addArgument(y1);
+                                sender7.send(msgX7);
+                                sender7.send(msgY7);
 
-                        OSCMessage msgX3 = new OSCMessage();
-                        msgX3.setAddress("/X_3");
-                        msgX3.addArgument(x3);
+                                msgX2.addArgument(x4);
+                                msgY2.addArgument(y4);
+                                sender2.send(msgX2);
+                                sender2.send(msgY2);
+                                break;
+                            }
+                            case 3: {
 
-
-                        OSCMessage msgY3 = new OSCMessage();
-                        msgY3.setAddress("/Y_3");
-                        msgY3.addArgument(y3);
-
-                        sender3.send(msgX3);
-                        sender3.send(msgY3);
-
-                        OSCMessage msgX4 = new OSCMessage();
-                        msgX4.setAddress("/X_4");
-                        msgX4.addArgument(x4);
-
-
-                        OSCMessage msgY4 = new OSCMessage();
-                        msgY4.setAddress("/Y_4");
-                        msgY4.addArgument(y4);
-
-                        sender4.send(msgX4);
-                        sender4.send(msgY4);
+                                msgX7.addArgument(x1);
+                                msgY7.addArgument(y1);
+                                sender7.send(msgX7);
+                                sender7.send(msgY7);
 
 
-                        OSCMessage msgX5 = new OSCMessage();
-                        msgX5.setAddress("/X_5");
-                        msgX5.addArgument(x5);
+                                msgX1.addArgument(x3);
+                                msgY1.addArgument(y3);
+                                sender1.send(msgX1);
+                                sender1.send(msgY1);
 
 
-                        OSCMessage msgY5 = new OSCMessage();
-                        msgY5.setAddress("/Y_5");
-                        msgY5.addArgument(y5);
+                                msgX5.addArgument(x7);
+                                msgY5.addArgument(y7);
+                                sender5.send(msgX5);
+                                sender5.send(msgY5);
+                                break;
+                            }
+                            case 4: {
 
-                        sender5.send(msgX5);
-                        sender5.send(msgY5);
-
-
-                        OSCMessage msgX6 = new OSCMessage();
-                        msgX6.setAddress("/X_6");
-                        msgX6.addArgument(x6);
-
-
-                        OSCMessage msgY6 = new OSCMessage();
-                        msgY6.setAddress("/Y_6");
-                        msgY6.addArgument(y6);
+                                msgX7.addArgument(x1);
+                                msgY7.addArgument(y1);
+                                sender7.send(msgX7);
+                                sender7.send(msgY7);
 
 
-                        sender6.send(msgX6);
-                        sender6.send(msgY6);
+                                msgX4.addArgument(x6);
+                                msgY4.addArgument(y6);
+                                sender4.send(msgX4);
+                                sender4.send(msgY4);
+                                break;
+                            }
+                            case 5: {
 
-                        OSCMessage msgX7 = new OSCMessage();
-                        msgX7.setAddress("/X_7");
-                        msgX7.addArgument(x7);
-
-                        OSCMessage msgY7 = new OSCMessage();
-                        msgY7.setAddress("/Y_7");
-                        msgY7.addArgument(y7);
+                                msgX7.addArgument(x1);
+                                msgY7.addArgument(y1);
+                                sender7.send(msgX7);
+                                sender7.send(msgY7);
 
 
-                        sender7.send(msgX7);
-                        sender7.send(msgY7);
+                                msgX8.addArgument(x2);
+                                msgY8.addArgument(y2);
+                                sender8.send(msgX8);
+                                sender8.send(msgY8);
+                                break;
+                            }
+                            case 6: {
 
-                        OSCMessage msgX8 = new OSCMessage();
-                        msgX8.setAddress("/X_8");
-                        msgX8.addArgument(x8);
+                                msgX7.addArgument(x1);
+                                msgY7.addArgument(y1);
+                                sender7.send(msgX7);
+                                sender7.send(msgY7);
 
-                        OSCMessage msgY8 = new OSCMessage();
-                        msgY8.setAddress("/Y_8");
-                        msgY8.addArgument(y8);
 
-                        sender8.send(msgX8);
-                        sender8.send(msgY8);
+                                msgX1.addArgument(x3);
+                                msgY1.addArgument(y3);
+                                sender1.send(msgX1);
+                                sender1.send(msgY1);
+
+
+                                msgX3.addArgument(x5);
+                                msgY3.addArgument(y5);
+                                sender3.send(msgX3);
+                                sender3.send(msgY3);
+
+
+                                msgX5.addArgument(x7);
+                                msgY5.addArgument(y7);
+                                sender5.send(msgX5);
+                                sender5.send(msgY5);
+                                break;
+                            }
+                            case 7: {
+
+                                msgX7.addArgument(x1);
+                                msgY7.addArgument(y1);
+                                sender7.send(msgX7);
+                                sender7.send(msgY7);
+
+
+                                msgX8.addArgument(x2);
+                                msgY8.addArgument(y2);
+                                sender8.send(msgX8);
+                                sender8.send(msgY8);
+
+
+                                msgX1.addArgument(x3);
+                                msgY1.addArgument(y3);
+                                sender1.send(msgX1);
+                                sender1.send(msgY1);
+
+
+                                msgX2.addArgument(x4);
+                                msgY2.addArgument(y4);
+                                sender2.send(msgX2);
+                                sender2.send(msgY2);
+
+                                msgX3.addArgument(x5);
+                                msgY3.addArgument(y5);
+                                sender3.send(msgX3);
+                                sender3.send(msgY3);
+
+
+                                msgX4.addArgument(x6);
+                                msgY4.addArgument(y6);
+                                sender4.send(msgX4);
+                                sender4.send(msgY4);
+
+
+                                msgX5.addArgument(x7);
+                                msgY5.addArgument(y7);
+                                sender5.send(msgX5);
+                                sender5.send(msgY5);
+
+                                msgX6.addArgument(x8);
+                                msgY6.addArgument(y8);
+                                sender6.send(msgX6);
+                                sender6.send(msgY6);
+                                break;
+                            }
+                            default: {
+                                break;
+                            }
+                        }
                         break;
                     }
+                    case 8: {
+                        switch (radioTrack) {
+                            case 1: {
+
+
+                                msgX8.addArgument(x1);
+                                msgY8.addArgument(y1);
+                                sender8.send(msgX8);
+                                sender8.send(msgY8);
+                                break;
+                            }
+                            case 2: {
+
+                                msgX8.addArgument(x1);
+                                msgY8.addArgument(y1);
+                                sender8.send(msgX8);
+                                sender8.send(msgY8);
+
+                                msgX3.addArgument(x4);
+                                msgY3.addArgument(y4);
+                                sender3.send(msgX3);
+                                sender3.send(msgY3);
+                                break;
+                            }
+                            case 3: {
+
+                                msgX8.addArgument(x1);
+                                msgY8.addArgument(y1);
+                                sender8.send(msgX8);
+                                sender8.send(msgY8);
+
+
+                                msgX2.addArgument(x3);
+                                msgY2.addArgument(y3);
+                                sender2.send(msgX2);
+                                sender2.send(msgY2);
+
+
+                                msgX6.addArgument(x7);
+                                msgY6.addArgument(y7);
+                                sender6.send(msgX6);
+                                sender6.send(msgY6);
+                                break;
+                            }
+                            case 4: {
+
+                                msgX8.addArgument(x1);
+                                msgY8.addArgument(y1);
+                                sender8.send(msgX8);
+                                sender8.send(msgY8);
+
+
+                                msgX5.addArgument(x6);
+                                msgY5.addArgument(y6);
+                                sender5.send(msgX5);
+                                sender5.send(msgY5);
+                                break;
+                            }
+                            case 5: {
+
+                                msgX8.addArgument(x1);
+                                msgY8.addArgument(y1);
+                                sender8.send(msgX8);
+                                sender8.send(msgY8);
+
+
+                                msgX1.addArgument(x2);
+                                msgY1.addArgument(y2);
+                                sender1.send(msgX1);
+                                sender1.send(msgY1);
+                                break;
+                            }
+                            case 6: {
+
+                                msgX8.addArgument(x1);
+                                msgY8.addArgument(y1);
+                                sender8.send(msgX8);
+                                sender8.send(msgY8);
+
+
+                                msgX2.addArgument(x3);
+                                msgY2.addArgument(y3);
+                                sender2.send(msgX2);
+                                sender2.send(msgY2);
+
+
+                                msgX4.addArgument(x5);
+                                msgY4.addArgument(y5);
+                                sender4.send(msgX4);
+                                sender4.send(msgY4);
+
+
+                                msgX6.addArgument(x7);
+                                msgY6.addArgument(y7);
+                                sender6.send(msgX6);
+                                sender6.send(msgY6);
+                                break;
+                            }
+                            case 7: {
+
+                                msgX8.addArgument(x1);
+                                msgY8.addArgument(y1);
+                                sender8.send(msgX8);
+                                sender8.send(msgY8);
+
+
+                                msgX1.addArgument(x2);
+                                msgY1.addArgument(y2);
+                                sender1.send(msgX1);
+                                sender1.send(msgY1);
+
+
+                                msgX2.addArgument(x3);
+                                msgY2.addArgument(y3);
+                                sender2.send(msgX2);
+                                sender2.send(msgY2);
+
+
+                                msgX3.addArgument(x4);
+                                msgY3.addArgument(y4);
+                                sender3.send(msgX3);
+                                sender3.send(msgY3);
+
+                                msgX4.addArgument(x5);
+                                msgY4.addArgument(y5);
+                                sender4.send(msgX4);
+                                sender4.send(msgY4);
+
+
+                                msgX5.addArgument(x6);
+                                msgY5.addArgument(y6);
+                                sender5.send(msgX5);
+                                sender5.send(msgY5);
+
+
+                                msgX6.addArgument(x7);
+                                msgY6.addArgument(y7);
+                                sender6.send(msgX6);
+                                sender6.send(msgY6);
+
+                                msgX7.addArgument(x8);
+                                msgY7.addArgument(y8);
+                                sender7.send(msgX7);
+                                sender7.send(msgY7);
+                                break;
+                            }
+                            default: {
+                                break;
+                            }
+                        }
+                        break;
+                    }
+
                     default: {
                         break;
                     }
                 }
+
+
             }
 
         } catch (Exception ignored) {
-
+            Log.d("sending Exception", ignored.toString());
         }
 
     }
