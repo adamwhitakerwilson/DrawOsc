@@ -20,11 +20,20 @@ public class DrawActivity2 extends Activity {
     private RadioButton out5;
     private RadioButton out6;
     private RadioButton out7;
+    private RadioButton id1;
+    private RadioButton id2;
+    private RadioButton id3;
+    private RadioButton id4;
+    private RadioButton id5;
+    private RadioButton id6;
+    private RadioButton id7;
+    private RadioButton id8;
     private ToggleButton pause;
     private int check;
     private String ip;
     private int port;
     private int outTrack = 0;
+    private int idTrack = 0;
     private boolean pauser;
 
     @Override
@@ -51,12 +60,26 @@ public class DrawActivity2 extends Activity {
         out5 = (RadioButton) findViewById(R.id.out5);
         out6 = (RadioButton) findViewById(R.id.out6);
         out7 = (RadioButton) findViewById(R.id.out7);
+        id1 = (RadioButton) findViewById(R.id.id1);
+        id2 = (RadioButton) findViewById(R.id.id2);
+        id3 = (RadioButton) findViewById(R.id.id3);
+        id4 = (RadioButton) findViewById(R.id.id4);
+        id5 = (RadioButton) findViewById(R.id.id5);
+        id6 = (RadioButton) findViewById(R.id.id6);
+        id7 = (RadioButton) findViewById(R.id.id7);
+        id8 = (RadioButton) findViewById(R.id.id8);
         dv = (DrawingView) findViewById(R.id.signature_canvas);
+
+        check = 0;
+        setSender(check);
+        outTrack = 1;
+        setTrack(outTrack);
+        idTrack = 1;
+        setIdentity(idTrack);
 
         pause.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton toggleButton, boolean isChecked) {
-                Log.d("tog:", Boolean.toString(isChecked));
                 setPauser(isChecked);
             }
         });
@@ -117,6 +140,54 @@ public class DrawActivity2 extends Activity {
             }
         });
 
+        final RadioGroup radioGroup3 = (RadioGroup) findViewById(R.id.identitySwitch);
+        radioGroup3.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(RadioGroup group, int checkedId) {
+
+                if (id1.isChecked()) {
+                    idTrack = 1;
+                    setIdentity(idTrack);
+                }
+                if (id2.isChecked()) {
+                    idTrack = 2;
+                    setIdentity(idTrack);
+                }
+                if (id3.isChecked()) {
+                    idTrack = 3;
+                    setIdentity(idTrack);
+                }
+                if (id4.isChecked()) {
+                    idTrack = 4;
+                    setIdentity(idTrack);
+                }
+                if (id5.isChecked()) {
+                    idTrack = 5;
+                    setIdentity(idTrack);
+                }
+                if (id6.isChecked()) {
+                    idTrack = 6;
+                    setIdentity(idTrack);
+                }
+                if (id7.isChecked()) {
+                    idTrack = 7;
+                    setIdentity(idTrack);
+                }
+                if (id8.isChecked()) {
+                    idTrack = 8;
+                    setIdentity(idTrack);
+                }
+            }
+        });
+
+    }
+
+    public void setIdentity(int idTrack){
+        this.idTrack = idTrack;
+    }
+
+    public int getIdTrack(){
+        return idTrack;
     }
 
     public boolean getPauser() {
